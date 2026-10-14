@@ -15,6 +15,7 @@ namespace Loomfall.EditorTools
         {
             LoomfallYard.Build();
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            LoomfallCore.BuildVolume();
 
             GameObject weaver = null;
             foreach (Animator animator in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None))
@@ -77,6 +78,9 @@ namespace Loomfall.EditorTools
             {
                 clock.baseIntensities[i] = clock.lights[i].intensity;
             }
+
+            clock.mainCamera = camera;
+            clock.volume = Object.FindFirstObjectByType<UnityEngine.Rendering.Volume>();
 
             GameObject lampModel = LoomfallStudio.LoadModel(Kit + "/template-wall-detail-a.fbx");
             Vector3[] lampPlaces =

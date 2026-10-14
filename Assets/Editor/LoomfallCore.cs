@@ -280,20 +280,38 @@ namespace Loomfall.EditorTools
         /// <summary>Материал URP с текстурой; нужен для моделей кита и персонажа.</summary>
         public static Material MakeTextureMaterial(string name, string texturePath)
         {
+            EnsureFolder(MaterialsFolder);
+            string path = $"{MaterialsFolder}/{name}.mat";
+
             var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
             if (texture == null)
             {
                 Debug.LogWarning($"[Loomfall] Текстура не найдена: {texturePath}");
             }
 
-            var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            material.SetTexture("_BaseMap", texture);
-            material.SetFloat("_Smoothness", 0.35f);
+            // Материал переиспользуем: повторный CreateAsset по тому же пути возвращает null.
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                AssetDatabase.CreateAsset(material, path);
+                material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            }
 
-            EnsureFolder(MaterialsFolder);
-            string path = $"{MaterialsFolder}/{name}.mat";
-            AssetDatabase.CreateAsset(material, path);
-            return AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                Debug.LogError($"[Loomfall] Материал не создан: {path}");
+                return null;
+            }
+
+            material.shader = Shader.Find("Universal Render Pipeline/Lit");
+            material.SetTexture("_BaseMap", texture);
+            material.SetColor("_BaseColor", Color.white);
+            material.SetFloat("_Smoothness", 0.3f);
+            material.SetFloat("_Metallic", 0f);
+            EditorUtility.SetDirty(material);
+            AssetDatabase.SaveAssets();
+            return material;
         }
 
         /// <summary>Создаёт папку в проекте вместе с родительскими.</summary>
