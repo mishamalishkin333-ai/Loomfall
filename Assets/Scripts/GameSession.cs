@@ -66,6 +66,15 @@ namespace Loomfall
             Debug.Log("[Loomfall] Записей в Кодексе: " + Shards);
         }
 
+        /// <summary>Реплика мира на действие Ткача: каждая трата Эха стирает чью-то секунду.</summary>
+        public void Shout(string word)
+        {
+            Codex = word == "Слово"
+                ? "Слово сказано вслух. Кто-то чужой забыл эту секунду."
+                : "Разрыв прошёл по камню. Память яруса стала тоньше.";
+            CodexTime = Time.time;
+        }
+
         private static int ReadInt(string key, int fallback)
         {
             return int.TryParse(PlatformBridge.Load(key, fallback.ToString()), out int value) ? value : fallback;

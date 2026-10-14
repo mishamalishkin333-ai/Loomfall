@@ -62,6 +62,13 @@ namespace Loomfall
             Debug.Log("[Loomfall] Светильник держит сектор: Забвение " + Oblivion.ToString("F2", CultureInfo.InvariantCulture));
         }
 
+        /// <summary>Магия сжигает Эхо: Забвение подскакивает, и вид мира сразу пересчитывается.</summary>
+        public void Burn(float amount)
+        {
+            Oblivion = Mathf.Clamp01(Oblivion + amount);
+            ApplyLook(Oblivion, lights, baseIntensities, mainCamera, volume, baseFogDensity, maxFogDensity, baseExposure, darkExposure);
+        }
+
         /// <summary>Вид мира по числу Забвения: свет, туман, фон камеры, экспозиция и цвет.</summary>
         public static void ApplyLook(
             float oblivion,

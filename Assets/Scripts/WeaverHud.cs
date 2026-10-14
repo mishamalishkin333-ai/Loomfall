@@ -46,10 +46,19 @@ namespace Loomfall
                     accent);
             }
 
-            if (session != null && Time.time - session.CodexTime < 4.5f)
+            WeaverWord word = WeaverWord.Instance;
+            if (word != null)
             {
                 GUI.Label(
                     new Rect(28f, 158f, 1300f, 30f),
+                    "Эхо: " + Mathf.RoundToInt(word.Echo) + " из 100 — «Q» Слово, «F» Разрыв (жгут память яруса)",
+                    line);
+            }
+
+            if (session != null && Time.time - session.CodexTime < 4.5f)
+            {
+                GUI.Label(
+                    new Rect(28f, 190f, 1300f, 30f),
                     "Запись Кодекса (" + session.Shards + "): " + session.Codex,
                     accent);
             }
