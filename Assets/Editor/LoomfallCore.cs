@@ -179,6 +179,8 @@ namespace Loomfall.EditorTools
             BuildSummary summary = report.summary;
             Debug.Log($"[Loomfall] Сборка: {summary.result}, размер {summary.totalSize / (1024f * 1024f):F1} МБ, ошибок {summary.totalErrors}");
 
+            LoomfallWeb.PatchTemplate(Path.Combine(BuildFolder, "index.html"));
+
             if (summary.result != BuildResult.Succeeded)
             {
                 EditorApplication.Exit(1);

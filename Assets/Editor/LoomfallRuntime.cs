@@ -54,6 +54,11 @@ namespace Loomfall.EditorTools
             hud.player = weaver.transform;
             hud.loom = loom.transform;
 
+            var sessionObject = new GameObject("Сессия");
+            var session = sessionObject.AddComponent<Loomfall.GameSession>();
+            session.player = weaver.transform;
+            session.loom = loom.transform;
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
