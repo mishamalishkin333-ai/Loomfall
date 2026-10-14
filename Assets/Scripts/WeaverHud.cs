@@ -36,6 +36,15 @@ namespace Loomfall
             GUI.Label(new Rect(28f, 22f, 1100f, 40f), "Ткач Ярусов — нижний двор, ярус " + tier, title);
             GUI.Label(new Rect(28f, 62f, 1100f, 30f), "Мир держится на нитях памяти. Из семи ярусов осталось пять.", accent);
             GUI.Label(new Rect(28f, 94f, 1100f, 30f), "Нить яруса: " + threads + " из " + need + " — каждая возвращает кусок чужой памяти.", line);
+
+            OblivionClock clock = OblivionClock.Instance;
+            if (clock != null)
+            {
+                GUI.Label(
+                    new Rect(28f, 126f, 1100f, 30f),
+                    "Забвение: " + Mathf.RoundToInt(clock.Oblivion * 100f) + "%, Светильников зажжено: " + clock.LitLamps,
+                    accent);
+            }
             GUI.Label(new Rect(28f, Screen.height - 62f, 1100f, 26f), "WASD — идти, Shift — бежать, пробел — прыжок, E — ткать, R — реклама за награду", line);
 
             if (player == null || loom == null) return;

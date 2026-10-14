@@ -63,6 +63,36 @@ namespace Loomfall.EditorTools
             var audio = audioObject.AddComponent<Loomfall.YardAudio>();
             audio.player = weaver.transform;
 
+            var clockObject = new GameObject("Забвение");
+            var clock = clockObject.AddComponent<Loomfall.OblivionClock>();
+            foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+            {
+                if (light.type == LightType.Directional)
+                {
+                    clock.sky = light;
+                    break;
+                }
+            }
+
+            if (clock.sky != null) clock.baseSkyIntensity = clock.sky.intensity;
+
+            GameObject lampModel = LoomfallStudio.LoadModel(Kit + "/template-wall-detail-a.fbx");
+            Vector3[] lampPlaces =
+            {
+                new Vector3(-5.5f, 1.8f, 2f),
+                new Vector3(5.5f, 1.8f, 5f),
+                new Vector3(-5.5f, 1.8f, 13f),
+            };
+
+            for (int i = 0; i < lampPlaces.Length; i++)
+            {
+                var lamp = new GameObject("Светильник-" + (i + 1));
+                lamp.transform.position = lampPlaces[i];
+                if (lampModel != null) LoomfallStudio.Place(lamp, lampModel, cave, lampPlaces[i], 0f);
+                var anchor = lamp.AddComponent<Loomfall.LampAnchor>();
+                anchor.player = weaver.transform;
+            }
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
