@@ -65,16 +65,18 @@ namespace Loomfall.EditorTools
 
             var clockObject = new GameObject("Забвение");
             var clock = clockObject.AddComponent<Loomfall.OblivionClock>();
+            var skyLights = new System.Collections.Generic.List<Light>();
             foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
             {
-                if (light.type == LightType.Directional)
-                {
-                    clock.sky = light;
-                    break;
-                }
+                if (light.type == LightType.Directional) skyLights.Add(light);
             }
 
-            if (clock.sky != null) clock.baseSkyIntensity = clock.sky.intensity;
+            clock.lights = skyLights.ToArray();
+            clock.baseIntensities = new float[clock.lights.Length];
+            for (int i = 0; i < clock.lights.Length; i++)
+            {
+                clock.baseIntensities[i] = clock.lights[i].intensity;
+            }
 
             GameObject lampModel = LoomfallStudio.LoadModel(Kit + "/template-wall-detail-a.fbx");
             Vector3[] lampPlaces =

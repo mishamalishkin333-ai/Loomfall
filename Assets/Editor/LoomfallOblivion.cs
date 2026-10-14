@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Loomfall.EditorTools
 {
-    /// <summary>Проверка механики Забвения: как мир бледнеет по мере роста числа.</summary>
+    /// <summary>Проверка механики Забвения: как мир тускнеет и бледнеет по мере роста числа.</summary>
     public static class LoomfallOblivion
     {
         private const string ScenePath = "Assets/Scenes/LowerYardModels.unity";
@@ -22,24 +23,28 @@ namespace Loomfall.EditorTools
                 return;
             }
 
-            Light sky = null;
-            foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+            Light[] lights = clock != null && clock.lights != null ? clock.lights : new Light[0];
+            float[] basis = clock != null ? clock.baseIntensities : null;
+            if (lights.Length == 0)
             {
-                if (light.type == LightType.Directional)
+                var found = new List<Light>();
+                foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
                 {
-                    sky = light;
-                    break;
+                    if (light.type == LightType.Directional) found.Add(light);
                 }
+
+                lights = found.ToArray();
+                basis = new float[lights.Length];
+                for (int i = 0; i < lights.Length; i++) basis[i] = lights[i].intensity;
             }
 
-            float baseSky = sky != null ? sky.intensity : 1.5f;
             float baseFog = clock != null ? clock.baseFogDensity : 0.02f;
-            float maxFog = clock != null ? clock.maxFogDensity : 0.055f;
+            float maxFog = clock != null ? clock.maxFogDensity : 0.07f;
 
             float[] steps = { 0f, 0.5f, 1f };
             foreach (float value in steps)
             {
-                Loomfall.OblivionClock.ApplyLook(value, sky, baseSky, baseFog, maxFog);
+                Loomfall.OblivionClock.ApplyLook(value, lights, basis, baseFog, maxFog);
 
                 string path = "C:/Unity/shots/oblivion-" + Mathf.RoundToInt(value * 100f) + ".png";
                 LoomfallCore.FrameStats stats = LoomfallCore.RenderShot(camera, path, 1280, 720);
