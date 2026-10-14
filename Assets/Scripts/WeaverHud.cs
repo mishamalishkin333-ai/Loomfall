@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Loomfall
 {
-    /// <summary>Экранный слой: задача яруса, подсказки управления и зов у ткацкого узла.</summary>
+    /// <summary>Экранный слой: название яруса, строка сюжета, счёт нитей, подсказки и зов узла.</summary>
     public class WeaverHud : MonoBehaviour
     {
         public Transform player;
@@ -11,6 +11,7 @@ namespace Loomfall
 
         private GUIStyle title;
         private GUIStyle line;
+        private GUIStyle accent;
 
         private void OnGUI()
         {
@@ -23,16 +24,24 @@ namespace Loomfall
                 line = new GUIStyle(GUI.skin.label);
                 line.fontSize = 17;
                 line.normal.textColor = new Color(0.84f, 0.84f, 0.88f);
+                accent = new GUIStyle(line);
+                accent.normal.textColor = new Color(0.72f, 0.78f, 0.9f);
             }
 
-            GUI.Label(new Rect(28f, 22f, 1000f, 40f), "Ткач Ярусов — нижний двор", title);
-            GUI.Label(new Rect(28f, 62f, 1000f, 30f), "Найдите ткацкий узел и натяните нить между ярусами", line);
-            GUI.Label(new Rect(28f, Screen.height - 62f, 1000f, 26f), "WASD — идти, Shift — бежать, пробел — прыжок", line);
+            GameSession session = GameSession.Instance;
+            int tier = session != null ? session.Tier : 1;
+            int threads = session != null ? session.Threads : 0;
+            int need = session != null ? session.threadsPerTier : 3;
+
+            GUI.Label(new Rect(28f, 22f, 1100f, 40f), "Ткач Ярусов — нижний двор, ярус " + tier, title);
+            GUI.Label(new Rect(28f, 62f, 1100f, 30f), "Мир держится на нитях памяти. Из семи ярусов осталось пять.", accent);
+            GUI.Label(new Rect(28f, 94f, 1100f, 30f), "Нить яруса: " + threads + " из " + need + " — каждая возвращает кусок чужой памяти.", line);
+            GUI.Label(new Rect(28f, Screen.height - 62f, 1100f, 26f), "WASD — идти, Shift — бежать, пробел — прыжок, E — ткать, R — реклама за награду", line);
 
             if (player == null || loom == null) return;
             if (Vector3.Distance(player.position, loom.position) > loomRadius) return;
 
-            GUI.Label(new Rect(Screen.width * 0.5f - 160f, Screen.height - 124f, 420f, 32f), "E — натянуть нить", title);
+            GUI.Label(new Rect(Screen.width * 0.5f - 170f, Screen.height - 130f, 440f, 32f), "E — натянуть нить", title);
         }
     }
 }

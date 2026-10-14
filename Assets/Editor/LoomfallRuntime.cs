@@ -59,6 +59,10 @@ namespace Loomfall.EditorTools
             session.player = weaver.transform;
             session.loom = loom.transform;
 
+            var audioObject = new GameObject("Звук");
+            var audio = audioObject.AddComponent<Loomfall.YardAudio>();
+            audio.player = weaver.transform;
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
