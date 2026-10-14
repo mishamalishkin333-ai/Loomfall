@@ -39,8 +39,7 @@ namespace Loomfall.EditorTools
             float[] steps = { 0f, 0.5f, 1f };
             foreach (float value in steps)
             {
-                RenderSettings.fogDensity = Mathf.Lerp(baseFog, maxFog, value);
-                if (sky != null) sky.intensity = Mathf.Lerp(baseSky, baseSky * 0.45f, value);
+                Loomfall.OblivionClock.ApplyLook(value, sky, baseSky, baseFog, maxFog);
 
                 string path = "C:/Unity/shots/oblivion-" + Mathf.RoundToInt(value * 100f) + ".png";
                 LoomfallCore.FrameStats stats = LoomfallCore.RenderShot(camera, path, 1280, 720);
