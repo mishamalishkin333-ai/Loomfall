@@ -99,6 +99,25 @@ namespace Loomfall.EditorTools
                 anchor.player = weaver.transform;
             }
 
+            Vector3[] shardPlaces =
+            {
+                new Vector3(-3.2f, 1.1f, 4.5f),
+                new Vector3(3.4f, 1.1f, 9f),
+                new Vector3(-4.2f, 1.1f, 15f),
+                new Vector3(2.2f, 1.1f, 18f),
+            };
+
+            for (int i = 0; i < shardPlaces.Length; i++)
+            {
+                var shardObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                shardObject.name = "Осколок-" + (i + 1);
+                shardObject.transform.position = shardPlaces[i];
+                shardObject.transform.localScale = Vector3.one * 0.45f;
+                var shard = shardObject.AddComponent<Loomfall.MemoryShard>();
+                shard.player = weaver.transform;
+                shard.index = i;
+            }
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();

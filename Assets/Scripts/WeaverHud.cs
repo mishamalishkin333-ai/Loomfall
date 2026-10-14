@@ -45,6 +45,14 @@ namespace Loomfall
                     "Забвение: " + Mathf.RoundToInt(clock.Oblivion * 100f) + "%, Светильников зажжено: " + clock.LitLamps,
                     accent);
             }
+
+            if (session != null && Time.time - session.CodexTime < 4.5f)
+            {
+                GUI.Label(
+                    new Rect(28f, 158f, 1300f, 30f),
+                    "Запись Кодекса (" + session.Shards + "): " + session.Codex,
+                    accent);
+            }
             GUI.Label(new Rect(28f, Screen.height - 62f, 1100f, 26f), "WASD — идти, Shift — бежать, пробел — прыжок, E — ткать, R — реклама за награду", line);
 
             if (player == null || loom == null) return;

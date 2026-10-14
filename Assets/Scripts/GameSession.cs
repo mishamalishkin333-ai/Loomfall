@@ -22,6 +22,7 @@ namespace Loomfall
             PlatformBridge.Init();
             Tier = ReadInt("tier", 1);
             Threads = ReadInt("threads", 0);
+            Shards = ReadInt("shards", 0);
             Debug.Log("[Loomfall] Ярус " + Tier + ", нитей натянуто " + Threads);
         }
 
@@ -49,6 +50,20 @@ namespace Loomfall
             PlatformBridge.Save("tier", Tier.ToString());
             PlatformBridge.Save("threads", Threads.ToString());
             Debug.Log("[Loomfall] Нить натянута: ярус " + Tier + ", нитей " + Threads);
+        }
+
+        public int Shards { get; private set; }
+        public string Codex { get; private set; } = string.Empty;
+        public float CodexTime { get; private set; }
+
+        /// <summary>Осколок памяти: чужая жизнь, запись в Кодексе и никакой пользы в бою.</summary>
+        public void CollectShard(string record)
+        {
+            Shards++;
+            Codex = record;
+            CodexTime = Time.time;
+            PlatformBridge.Save("shards", Shards.ToString());
+            Debug.Log("[Loomfall] Записей в Кодексе: " + Shards);
         }
 
         private static int ReadInt(string key, int fallback)
