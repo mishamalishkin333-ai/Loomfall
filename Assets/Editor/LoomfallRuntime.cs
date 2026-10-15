@@ -49,6 +49,16 @@ namespace Loomfall.EditorTools
                 weaver.AddComponent<Loomfall.WeaverWord>();
             }
 
+            // Управление с телефона: на устройствах без сенсора экран не рисуется.
+            var touch = weaver.GetComponent<Loomfall.TouchControls>();
+            if (touch == null)
+            {
+                touch = weaver.AddComponent<Loomfall.TouchControls>();
+            }
+
+            touch.weaver = weaver.GetComponent<Loomfall.WeaverController>();
+            Debug.Log("[Loomfall] Сенсорное управление: " + (touch.weaver != null ? "подключено" : "нет контроллера"));
+
             if (weaver.GetComponent<Loomfall.AmbienceLoop>() == null)
             {
                 weaver.AddComponent<Loomfall.AmbienceLoop>();

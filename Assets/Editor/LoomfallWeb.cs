@@ -7,7 +7,9 @@ namespace Loomfall.EditorTools
     /// <summary>Правка собранной страницы: подключает SDK площадок к WebGL-архиву.</summary>
     public static class LoomfallWeb
     {
-        private const string VkBridge = "https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js";
+        // Версия VK Bridge закреплена: unpkg по умолчанию отдаёт свежую сборку,
+        // и однажды выйдет версия, которая сломает вызовы.
+        private const string VkBridge = "https://unpkg.com/@vkontakte/vk-bridge@3.0.2/dist/browser.min.js";
         private const string YandexSdk = "https://yandex.ru/games/sdk/v2";
         private const string Marker = "loomfall-platforms";
 

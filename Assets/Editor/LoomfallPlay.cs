@@ -19,10 +19,15 @@ namespace Loomfall.EditorTools
 
         public static void Run()
         {
+            // Прогон начинается с чистого сохранения: иначе концовка и осколки подтянутся
+            // из прошлого запуска, и проверка финала станет бессмысленной.
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
             EditorSceneManager.OpenScene("Assets/Scenes/LowerYardModels.unity");
             frames = 0;
             started = false;
             maxY = 0f;
+            Debug.Log("[Loomfall] Прогон: сохранение очищено перед запуском");
             EditorApplication.update += Tick;
             EditorApplication.EnterPlaymode();
         }
@@ -120,9 +125,11 @@ namespace Loomfall.EditorTools
             var driver = Loomfall.WeaverController.Instance;
             if (driver != null)
             {
-                // Три фазы: ходьба, бег, затем подъём по ярусам.
+                // Три фазы: ходьба с клавиатуры, бег с телефона, затем подъём по ярусам.
                 driver.testMove = Vector2.zero;
                 driver.testSprint = false;
+                driver.touchMove = Vector2.zero;
+                driver.touchSprint = false;
 
                 if (frames == 15)
                 {
@@ -151,12 +158,13 @@ namespace Loomfall.EditorTools
                 }
                 else if (frames >= 100 && frames < 180)
                 {
-                    driver.testMove = new Vector2(0f, 1f);
-                    driver.testSprint = true;
+                    // Бег идёт через сенсорный ввод: так проверяется и путь с телефона.
+                    driver.touchMove = new Vector2(0f, 1f);
+                    driver.touchSprint = true;
                 }
                 else if (frames == 180)
                 {
-                    Debug.Log("[Loomfall] Скорость бега: "
+                    Debug.Log("[Loomfall] Скорость бега с телефона: "
                         + (speedCount > 0 ? (speedSum / speedCount).ToString("F2") : "?")
                         + " м/с из " + speedCount + " замеров при заданной " + driver.runSpeed.ToString("F2"));
                     speedSum = 0f;

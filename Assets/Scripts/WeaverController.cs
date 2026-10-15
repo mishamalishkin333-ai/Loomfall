@@ -17,6 +17,11 @@ namespace Loomfall
         public bool testJump;
         public bool testSprint;
 
+        /// <summary>Сенсорный ввод с телефона: заполняет TouchControls.</summary>
+        public Vector2 touchMove;
+        public bool touchJump;
+        public bool touchSprint;
+
         /// <summary>Сам Ткач: доступ без поиска объектов по сцене.</summary>
         public static WeaverController Instance { get; private set; }
 
@@ -47,12 +52,17 @@ namespace Loomfall
 
         private void Update()
         {
-            Keyboard keyboard = Keyboard.current;
+            Vector2 move = touchMove;
+            bool sprint = touchSprint;
+            bool jump = touchJump;
 
-            Vector2 move = testMove;
-            bool sprint = testSprint;
-            bool jump = testJump;
+            // Пробный ввод из проверок сильнее сенсора, клавиатура сильнее обоих.
+            if (testMove.sqrMagnitude > 0.001f) move = testMove;
+            if (testSprint) sprint = true;
+            if (testJump) jump = true;
             testJump = false;
+
+            Keyboard keyboard = Keyboard.current;
 
             if (keyboard != null)
             {

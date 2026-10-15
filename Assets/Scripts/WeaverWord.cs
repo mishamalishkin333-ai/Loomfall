@@ -15,6 +15,10 @@ namespace Loomfall
 
         public float Echo { get; private set; }
 
+        /// <summary>Пробное нажатие для проверок и для кнопок на телефоне.</summary>
+        public bool testPress;
+        public bool testRift;
+
         private void Awake()
         {
             Instance = this;
@@ -26,15 +30,24 @@ namespace Loomfall
             Echo = Mathf.Min(maxEcho, Echo + echoRegen * Time.deltaTime);
 
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null) return;
+            bool word = testPress;
+            bool rift = testRift;
+            testPress = false;
+            testRift = false;
 
-            if (keyboard.qKey.wasPressedThisFrame && Echo >= wordCost)
+            if (keyboard != null)
+            {
+                if (keyboard.qKey.wasPressedThisFrame) word = true;
+                if (keyboard.fKey.wasPressedThisFrame) rift = true;
+            }
+
+            if (word && Echo >= wordCost)
             {
                 Echo -= wordCost;
                 Cast("Слово", 3.2f, new Color(0.62f, 0.8f, 1f), 0.05f);
             }
 
-            if (keyboard.fKey.wasPressedThisFrame && Echo >= riftCost)
+            if (rift && Echo >= riftCost)
             {
                 Echo -= riftCost;
                 Cast("Разрыв", 6.5f, new Color(1f, 0.72f, 0.42f), 0.11f);
