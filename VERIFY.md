@@ -67,7 +67,7 @@ node C:\Unity\tools\serve.mjs C:\Unity\Loomfall\docs 8082
 | Репозиторий | `mishamalishkin333-ai/Loomfall`, публичный, ветка по умолчанию `main` |
 | Адрес игры | `https://mishamalishkin333-ai.github.io/Loomfall/` — **200**, 6 КБ |
 | Адрес политики | `https://mishamalishkin333-ai.github.io/Loomfall/privacy.html` — **200**, 8 КБ |
-| Файлы игры на площадке | `webgl.loader.js` 48 КБ, `webgl.framework.js.unityweb` 74 КБ, `webgl.data.unityweb` 4062 КБ, `webgl.wasm.unityweb` 8365 КБ — все **200** |
+| Файлы игры на площадке | `webgl.loader.js` 48 КБ, `webgl.framework.js.unityweb` 74 КБ, `webgl.data.unityweb` 3984 КБ, `webgl.wasm.unityweb` 8347 КБ — все **200** |
 | Совпадение с проверенной сборкой | **MD5 совпал у всех шести файлов** — опубликована ровно та сборка, которую проверяли |
 | Регистр адреса | GitHub Pages чувствителен к регистру: репозиторий назван `Loomfall`, поэтому адрес с маленькой буквы даёт 404. Ссылки для площадок — с заглавной `L` |
 | Папка Build в git | правило `[Bb]uild/` в `.gitignore` её исключало — исправлено отрицанием `!/docs/Build/`; иначе Pages отдал бы страницу без игры |
