@@ -44,6 +44,16 @@ git remote add origin https://github.com/mishamalishkin333-ai/loomfall.git
 git push -u origin main
 ```
 
+Вариант Г (GitHub Desktop — вы уже в него вошли):
+
+1. **File → Add local repository** → выберите `C:\Unity\Loomfall` → **Add**.
+   Desktop покажет 58 коммитов в ветке `main`.
+2. Нажмите **Publish repository** в верхней панели.
+3. Имя: `loomfall`. **Снимите галочку «Keep this code private»** — для бесплатных
+   GitHub Pages репозиторий должен быть публичным.
+4. Нажмите **Publish**. Desktop создаст репозиторий и загрузит все 12,28 МБ архива.
+5. Дальше включите Pages по шагу 2 ниже — Desktop этого не умеет.
+
 Вариант Б (вы делаете сами):
 
 ```
