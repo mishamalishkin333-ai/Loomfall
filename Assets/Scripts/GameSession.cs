@@ -104,12 +104,12 @@ namespace Loomfall
             return Mathf.Clamp(tier, 1, MaxTier) + 2;
         }
 
-        /// <summary>Три концовки по библии: Слово, Разрыв и тихое Забвение.</summary>
+        /// <summary>Три концовки по библии: сброс, разрыв и тайный «Третий узор».</summary>
         public static string DecideEnding(float oblivion, int shards, int lamps)
         {
-            if (shards >= 4 && lamps >= 2 && oblivion < 0.4f) return "Слово";
+            if (shards >= 4 && lamps >= 2 && oblivion < 0.4f) return "Третий узор";
             if (oblivion >= 0.6f) return "Разрыв";
-            return "Забвение";
+            return "Сброс";
         }
 
         private static int ReadInt(string key, int fallback)
