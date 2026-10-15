@@ -139,15 +139,20 @@ namespace Loomfall.EditorTools
                     if (frames == 1)
                     {
                         introStart = driver.transform.position;
+                        var introClock = Loomfall.OblivionClock.Instance;
                         Debug.Log("[Loomfall] Заставка: видна — " + Loomfall.IntroScreen.BlocksInput
-                            + ", ввод игры заблокирован");
+                            + ", ввод игры заблокирован, Забвение "
+                            + (introClock != null ? introClock.Oblivion.ToString("F6") : "нет часов"));
                     }
                 }
                 else if (frames == 15)
                 {
                     float underIntro = Vector3.Distance(introStart, driver.transform.position);
+                    var frozen = Loomfall.OblivionClock.Instance;
                     Debug.Log("[Loomfall] Заставка: сдвиг Ткача под заставкой " + underIntro.ToString("F4")
-                        + " м за 14 кадров подачи движения");
+                        + " м за 14 кадров подачи движения, Забвение "
+                        + (frozen != null ? frozen.Oblivion.ToString("F6") : "нет часов")
+                        + " (должно совпасть с кадром 1 — под заставкой часы стоят)");
 
                     var intro = Loomfall.IntroScreen.Instance;
                     if (intro != null) intro.Dismiss();

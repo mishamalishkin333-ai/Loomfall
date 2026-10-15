@@ -115,3 +115,9 @@ Unity.exe -batchmode -nographics -quit -projectPath . -executeMethod Loomfall.Ed
 Коротко: репозиторий на GitHub, Pages из папки `docs`, затем адрес приложения
 `https://ВАШ_НИК.github.io/loomfall/` и политика конфиденциальности
 `https://ВАШ_НИК.github.io/loomfall/privacy.html`.
+
+Проверить готовность к публикации, ничего не публикуя:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File publish.ps1 -DryRun
+```

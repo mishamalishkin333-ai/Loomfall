@@ -39,6 +39,9 @@ namespace Loomfall
 
         private void Update()
         {
+            // На заставке часы стоят: игрок ещё читает, время не должно утекать.
+            if (IntroScreen.BlocksInput) return;
+
             // Каждый зажжённый Светильник держит сектор: рост Забвения падает на четверть.
             float hold = Mathf.Pow(0.75f, LitLamps);
             Oblivion = Mathf.Clamp01(Oblivion + growthPerSecond * hold * Time.deltaTime);
