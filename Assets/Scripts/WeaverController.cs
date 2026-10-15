@@ -15,6 +15,7 @@ namespace Loomfall
         /// <summary>Пробный ввод для проверок без клавиатуры: в игре не используется.</summary>
         public Vector2 testMove;
         public bool testJump;
+        public bool testSprint;
 
         /// <summary>Сам Ткач: доступ без поиска объектов по сцене.</summary>
         public static WeaverController Instance { get; private set; }
@@ -49,7 +50,7 @@ namespace Loomfall
             Keyboard keyboard = Keyboard.current;
 
             Vector2 move = testMove;
-            bool sprint = false;
+            bool sprint = testSprint;
             bool jump = testJump;
             testJump = false;
 

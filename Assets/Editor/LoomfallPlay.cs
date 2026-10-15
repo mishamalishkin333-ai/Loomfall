@@ -11,6 +11,9 @@ namespace Loomfall.EditorTools
         private static Vector3 startPosition;
         private static float startTime;
         private static float maxY;
+        private static Vector3 previousPosition;
+        private static float speedSum;
+        private static int speedCount;
         private static bool started;
 
         public static void Run()
@@ -116,14 +119,50 @@ namespace Loomfall.EditorTools
             var driver = Loomfall.WeaverController.Instance;
             if (driver != null)
             {
-                // Ведём узел вверх по ярусам шагами: высоту определяет настоящий код опоры на пол.
+                // Три фазы: ходьба, бег, затем подъём по ярусам.
+                driver.testMove = Vector2.zero;
+                driver.testSprint = false;
+
                 if (frames == 15)
                 {
-                    Debug.Log("[Loomfall] Подъём: шагаем от двора к пятому ярусу, высоту решает опора на пол");
+                    previousPosition = driver.transform.position;
+                    speedSum = 0f;
+                    speedCount = 0;
+                }
+                else if (Time.deltaTime > 0.000001f)
+                {
+                    speedSum += Vector3.Distance(previousPosition, driver.transform.position) / Time.deltaTime;
+                    speedCount++;
+                    previousPosition = driver.transform.position;
                 }
 
-                driver.testMove = Vector2.zero;
-                if (frames >= 20 && frames < 380)
+                if (frames >= 20 && frames < 100)
+                {
+                    driver.testMove = new Vector2(0f, 1f);
+                }
+                else if (frames == 100)
+                {
+                    Debug.Log("[Loomfall] Скорость ходьбы: "
+                        + (speedCount > 0 ? (speedSum / speedCount).ToString("F2") : "?")
+                        + " м/с из " + speedCount + " замеров при заданной " + driver.walkSpeed.ToString("F2"));
+                    speedSum = 0f;
+                    speedCount = 0;
+                }
+                else if (frames >= 100 && frames < 180)
+                {
+                    driver.testMove = new Vector2(0f, 1f);
+                    driver.testSprint = true;
+                }
+                else if (frames == 180)
+                {
+                    Debug.Log("[Loomfall] Скорость бега: "
+                        + (speedCount > 0 ? (speedSum / speedCount).ToString("F2") : "?")
+                        + " м/с из " + speedCount + " замеров при заданной " + driver.runSpeed.ToString("F2"));
+                    speedSum = 0f;
+                    speedCount = 0;
+                    Debug.Log("[Loomfall] Подъём: шагаем от двора к пятому ярусу, высоту решает опора на пол");
+                }
+                else if (frames >= 200 && frames < 380)
                 {
                     // Только вперёд: высоту подъёма на пандусах решает опора на пол.
                     driver.transform.position += new Vector3(0f, 0f, 0.5f);
