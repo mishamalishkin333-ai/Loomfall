@@ -54,7 +54,8 @@ node C:\Unity\tools\serve.mjs C:\Unity\Loomfall\docs 8082
 | Повтор после включения сглаживания | те же значения, ошибок нет |
 | Вызовы площадок в собранном движке | `VKWebAppInit`, `VKWebAppStorageGet`, `VKWebAppStorageSet`, `VKWebAppShowNativeAds`, `LoadingAPI`, `showRewardedVideo` — все по 1 |
 | Импорты моста в wasm (сторона C#) | `LoomfallInit`, `LoomfallStorageGet`, `LoomfallStorageSet`, `LoomfallShowAd`, `LoomfallFree` — все по 1 |
-| Проверка моста к площадкам | **17 из 17** на подставных SDK (`node Tools/bridge-test.mjs`) |
+| Проверка моста к площадкам | **22 из 22** на подставных SDK (`node Tools/bridge-test.mjs`) |
+| Игра внутри iframe VK | запрет `localStorage` и отказ SDK не валят мост: прогресс живёт в памяти сеанса, чтение отдаёт значение по умолчанию |
 | Готовность площадке | отправляется после первого кадра, а не при запуске: в прогоне — «готовность отправлена на кадре 2», повторно не уходит |
 | Версия VK Bridge на странице | закреплена: `@vkontakte/vk-bridge@3.0.2` |
 | Настоящих ошибок на странице | **0** (семь найденных «error» — это комментарии в шаблоне Unity) |
@@ -142,7 +143,7 @@ Unity.exe -batchmode -projectPath <проект> -executeMethod Loomfall.EditorT
 # проверить управление, заставку и профиль качества (20 проверок)
 Unity.exe -batchmode -quit -projectPath <проект> -executeMethod Loomfall.EditorTools.LoomfallTouch.Run -logfile touch.log
 
-# проверить мост к площадкам на подставных SDK (17 проверок)
+# проверить мост к площадкам на подставных SDK (22 проверки)
 node Tools/bridge-test.mjs
 
 # убедиться, что вызовы площадок попали в собранный движок

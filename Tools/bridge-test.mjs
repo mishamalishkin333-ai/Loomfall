@@ -158,6 +158,60 @@ function loadLibrary(windowMock) {
   check('чтение из localStorage', library.LoomfallStorageGet({ value: 'progress' }).value === 'локально');
 }
 
+// --- Сценарий 4: игра внутри iframe VK, где браузер запретил localStorage ---
+// Именно так ведёт себя сторонний iframe при запрете сторонних cookie:
+// обращение к localStorage выбрасывает SecurityError. Игра падать не должна.
+{
+  console.log('Запрет localStorage (iframe VK):');
+  const blocked = {
+    getItem() { throw new Error('SecurityError: storage is blocked in this frame'); },
+    setItem() { throw new Error('SecurityError: storage is blocked in this frame'); }
+  };
+
+  const library = loadLibrary({ localStorage: blocked });
+  let crashed = false;
+  try {
+    library.LoomfallInit();
+    library.LoomfallReady();
+    library.LoomfallStorageSet({ value: 'progress' }, { value: 'из_iframe' });
+    library.LoomfallShowAd();
+  } catch (e) { crashed = true; }
+  check('мост не падает при запрете localStorage', !crashed);
+  check('запись переживает сеанс в памяти',
+    library.LoomfallStorageGet({ value: 'progress' }).value === 'из_iframe');
+
+  // Свежий сеанс без прежних записей: чтение обязано вернуть пусто, а не упасть.
+  const fresh = loadLibrary({ localStorage: blocked });
+  fresh.LoomfallInit();
+  check('чтение при запрете localStorage отдаёт пусто (игра возьмёт значение по умолчанию)',
+    fresh.LoomfallStorageGet({ value: 'tier' }).value === '');
+}
+
+// --- Сценарий 5: SDK площадки подключён, но вызовы отбиты (нет прав, обрыв сети) ---
+{
+  console.log('Отказ SDK площадки:');
+  const windowMock = {
+    localStorage: {
+      store: {},
+      getItem(k) { return this.store[k] || null; },
+      setItem(k, v) { this.store[k] = v; }
+    },
+    vkBridge: { send() { return Promise.reject(new Error('площадка недоступна')); } }
+  };
+
+  const library = loadLibrary(windowMock);
+  let crashed = false;
+  try {
+    library.LoomfallInit();
+    library.LoomfallStorageSet({ value: 'progress' }, { value: 'на месте' });
+    library.LoomfallShowAd();
+  } catch (e) { crashed = true; }
+  await tick();
+  check('отказ SDK не валит мост', !crashed);
+  check('сохранение всё равно уходит в память браузера',
+    windowMock.localStorage.getItem('loomfall.progress') === 'на месте');
+}
+
 console.log('');
 console.log('итог: успешно ' + passed + ', сбоев ' + failed);
 process.exit(failed === 0 ? 0 : 1);
