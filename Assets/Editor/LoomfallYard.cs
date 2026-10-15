@@ -175,9 +175,13 @@ namespace Loomfall.EditorTools
             wallUpperEast.transform.position = new Vector3(upOffset + tile + 0.5f, upperLevel + 1.5f, upStart + upZ * tile * 0.5f);
             wallUpperEast.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, upZ * tile + 2f);
 
-            var wallUpperFar = new GameObject("СтенаЯрусаТорец");
-            wallUpperFar.transform.position = new Vector3(0f, upperLevel + 1.5f, upStart + upZ * tile + 0.5f);
-            wallUpperFar.AddComponent<BoxCollider>().size = new Vector3(upX * tile + 2f, 3f, 1f);
+            var wallUpperFarWest = new GameObject("СтенаЯрусаТорецЗапад");
+            wallUpperFarWest.transform.position = new Vector3(-upOffset - 2.5f, upperLevel + 1.5f, upStart + upZ * tile + 0.5f);
+            wallUpperFarWest.AddComponent<BoxCollider>().size = new Vector3(upX * tile * 0.5f - 4f, 3f, 1f);
+
+            var wallUpperFarEast = new GameObject("СтенаЯрусаТорецВосток");
+            wallUpperFarEast.transform.position = new Vector3(upOffset + 2.5f, upperLevel + 1.5f, upStart + upZ * tile + 0.5f);
+            wallUpperFarEast.AddComponent<BoxCollider>().size = new Vector3(upX * tile * 0.5f - 4f, 3f, 1f);
 
             // Замер подъёма: высота земли вдоль пандуса обязана расти от двора к верхнему ярусу.
             float[] probes = { startZ - tile, startZ + tile * 0.5f, startZ + tile * 2f, startZ + tile * 3f, upStart + tile * 2f };
@@ -190,6 +194,75 @@ namespace Loomfall.EditorTools
                 }
 
                 Debug.Log("[Loomfall] Подъём: z " + probe.ToString("F1") + " -> высота " + height.ToString("F2"));
+            }
+
+            // Третий ярус: ещё выше, второй пандус, свой Светильник и Осколок.
+            const float level3 = 8.8f;
+            float up3Start = upStart + upZ * tile + tile * 2f;
+            var upper3 = new GameObject("ТретийЯрус");
+
+            for (int x = 0; x < 5; x++)
+            {
+                for (int z = 0; z < 6; z++)
+                {
+                    LoomfallStudio.Place(upper3, floor, cave, new Vector3(x * tile - tile * 2f, level3, up3Start + z * tile), 0f);
+                }
+            }
+
+            for (int z = 0; z < 6; z++)
+            {
+                LoomfallStudio.Place(upper3, wall, cave, new Vector3(-tile * 3f, level3, up3Start + z * tile), 0f);
+                LoomfallStudio.Place(upper3, wall, cave, new Vector3(tile * 3f, level3, up3Start + z * tile), 0f);
+            }
+
+            var ramp3 = new GameObject("ПандусНаТретийЯрус");
+            ramp3.transform.position = new Vector3(0f, (upperLevel + level3) * 0.5f, upStart + upZ * tile + tile);
+            ramp3.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
+            ramp3.AddComponent<BoxCollider>().size = new Vector3(tile * 2.5f, 0.4f, 11f);
+
+            var floor3 = new GameObject("ПолТретьегоЯруса");
+            floor3.transform.position = new Vector3(0f, level3 - 0.05f, up3Start + tile * 2.5f);
+            floor3.AddComponent<BoxCollider>().size = new Vector3(5f * tile + 2f, 0.1f, 6f * tile + 4f);
+
+            var wall3West = new GameObject("СтенаТретьегоЗапад");
+            wall3West.transform.position = new Vector3(-tile * 3f - 0.5f, level3 + 1.5f, up3Start + tile * 2.5f);
+            wall3West.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, 6f * tile + 2f);
+
+            var wall3East = new GameObject("СтенаТретьегоВосток");
+            wall3East.transform.position = new Vector3(tile * 3f + 0.5f, level3 + 1.5f, up3Start + tile * 2.5f);
+            wall3East.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, 6f * tile + 2f);
+
+            GameObject lamp3 = LoomfallStudio.Place(
+                upper3,
+                LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
+                cave,
+                new Vector3(tile, level3 + 1.8f, up3Start + tile * 4f),
+                0f);
+            if (lamp3 != null)
+            {
+                var anchor3 = lamp3.AddComponent<Loomfall.LampAnchor>();
+                anchor3.player = weaver.transform;
+            }
+
+            var shard3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            shard3.name = "Осколок-6";
+            shard3.transform.position = new Vector3(-tile, level3 + 1.1f, up3Start + tile * 3f);
+            shard3.transform.localScale = Vector3.one * 0.45f;
+            var shard3Part = shard3.AddComponent<Loomfall.MemoryShard>();
+            shard3Part.player = weaver.transform;
+            shard3Part.index = 5;
+
+            // Замер второго подъёма: от верхнего яруса к третьему.
+            float[] probes3 = { upStart + upZ * tile + tile * 0.5f, upStart + upZ * tile + tile * 2f, up3Start + tile * 2.5f };
+            foreach (float probe in probes3)
+            {
+                float height = 0f;
+                if (Physics.Raycast(new Vector3(0f, level3 + 6f, probe), Vector3.down, out RaycastHit probe3Hit, 24f))
+                {
+                    height = probe3Hit.point.y;
+                }
+
+                Debug.Log("[Loomfall] Подъём выше: z " + probe.ToString("F1") + " -> высота " + height.ToString("F2"));
             }
 
             }
