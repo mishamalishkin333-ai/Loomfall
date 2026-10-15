@@ -37,8 +37,39 @@ namespace Loomfall.EditorTools
             if (frames == 60)
             {
                 var hero = Object.FindObjectOfType<Loomfall.WeaverController>();
-                Debug.Log("[Loomfall] Прогон: 60 кадров, Ткач на "
-                    + (hero != null ? hero.transform.position.ToString("F2") : "не найден"));
+                if (hero == null)
+                {
+                    Debug.Log("[Loomfall] Разбор: WeaverController не найден");
+                }
+                else
+                {
+                    Transform t = hero.transform;
+                    string parent = t.parent != null ? t.parent.name : "нет";
+                    Debug.Log("[Loomfall] Разбор: объект «" + hero.name + "», родитель «" + parent
+                        + "», мировые " + t.position.ToString("F2") + ", локальные " + t.localPosition.ToString("F2"));
+                    Debug.Log("[Loomfall] Разбор: детей " + t.childCount + ", Animator "
+                        + (hero.GetComponent<Animator>() != null ? "на себе" : "нет"));
+
+                    for (int i = 0; i < t.childCount && i < 4; i++)
+                    {
+                        Transform child = t.GetChild(i);
+                        Debug.Log("[Loomfall] Разбор: ребёнок «" + child.name + "» локально "
+                            + child.localPosition.ToString("F2") + ", мировые " + child.position.ToString("F2")
+                            + ", видим " + (child.GetComponent<Renderer>() != null));
+                    }
+                }
+
+                Camera cam = Camera.main;
+                if (cam != null)
+                {
+                    var follow = cam.GetComponent<Loomfall.WeaverCamera>();
+                    Debug.Log("[Loomfall] Разбор: камера на " + cam.transform.position.ToString("F2")
+                        + ", слежение " + (follow != null ? "есть" : "нет")
+                        + ", цель " + (follow != null && follow.target != null ? follow.target.name : "нет"));
+                }
+
+                var anim = Object.FindObjectOfType<Animator>();
+                Debug.Log("[Loomfall] Разбор: первый Animator на «" + (anim != null ? anim.name : "нет") + "»");
             }
 
             if (frames < 120) return;

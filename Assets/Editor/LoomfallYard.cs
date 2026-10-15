@@ -79,6 +79,7 @@ namespace Loomfall.EditorTools
 
             GameObject weaver = LoomfallStudio.Place(root, hero, skin, new Vector3(0f, 0f, -4.4f), 180f);
             weaver.transform.localScale = Vector3.one * (1.75f / Mathf.Max(0.05f, LoomfallStudio.MaxSize(hero)));
+            weaver.transform.localPosition = new Vector3(0f, 0.05f, -4.4f);
             Animator animator = weaver.GetComponent<Animator>();
             if (animator == null) animator = weaver.AddComponent<Animator>();
             animator.runtimeAnimatorController = LoomfallHeroAnim.EnsureController();

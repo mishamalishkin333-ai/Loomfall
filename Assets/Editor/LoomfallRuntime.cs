@@ -36,6 +36,11 @@ namespace Loomfall.EditorTools
                 weaver.AddComponent<Loomfall.WeaverController>();
             }
 
+            // Точка старта задаётся здесь: при постройке двора позиция до модели не доехала.
+            weaver.transform.position = new Vector3(0f, 0.05f, -4.4f);
+            Debug.Log("[Loomfall] Ткач на старте: " + weaver.transform.position.ToString("F2")
+                + ", родитель " + (weaver.transform.parent != null ? weaver.transform.parent.name : "нет"));
+
             if (weaver.GetComponent<Loomfall.WeaverWord>() == null)
             {
                 weaver.AddComponent<Loomfall.WeaverWord>();
