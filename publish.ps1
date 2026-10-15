@@ -77,6 +77,37 @@ if (-not $gh -or -not $Owner) {
     exit 1
 }
 
+Step 'Commit identity'
+# Commits made with the placeholder address are not credited to your account.
+# With no remote yet, rewriting history is safe, so the whole branch is re-signed.
+$email = (& $git config user.email)
+if ($email -like '*example.com') {
+    $login = (& $gh api user --jq .login 2>$null | Out-String).Trim()
+    $id = (& $gh api user --jq .id 2>$null | Out-String).Trim()
+    if ($login) {
+        $noreply = if ($id) { "$id+$login@users.noreply.github.com" } else { "$login@users.noreply.github.com" }
+        & $git config user.name $login
+        & $git config user.email $noreply
+        "identity set to $login <$noreply>"
+
+        $hasRemote = (& $git remote | Measure-Object -Line).Lines -gt 0
+        if (-not $hasRemote) {
+            $before = (& $git rev-list --count HEAD)
+            $env:FILTER_BRANCH_SQUELCH_WARNING = '1'
+            & $git filter-branch -f --env-filter "export GIT_AUTHOR_NAME='$login'; export GIT_AUTHOR_EMAIL='$noreply'; export GIT_COMMITTER_NAME='$login'; export GIT_COMMITTER_EMAIL='$noreply'" -- --all 2>&1 | Select-Object -Last 2
+            $after = (& $git rev-list --count HEAD)
+            "rewrote authors: commits $before -> $after, author now $((& $git log -1 --format='%an <%ae>'))"
+            if ($before -ne $after) {
+                Write-Host 'Commit count changed during rewrite - stopping before publishing.' -ForegroundColor Red
+                exit 1
+            }
+        }
+        else {
+            Write-Host 'A remote already exists, history left untouched: only new commits get the new author.' -ForegroundColor Yellow
+        }
+    }
+}
+
 Step 'Creating the repository and pushing the code'
 & $gh repo create "$Owner/$Repo" --public --source . --push --description 'Loomfall - Unity WebGL game'
 
