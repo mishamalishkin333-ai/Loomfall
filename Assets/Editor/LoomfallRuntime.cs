@@ -41,6 +41,11 @@ namespace Loomfall.EditorTools
                 weaver.AddComponent<Loomfall.WeaverWord>();
             }
 
+            if (weaver.GetComponent<Loomfall.AmbienceLoop>() == null)
+            {
+                weaver.AddComponent<Loomfall.AmbienceLoop>();
+            }
+
             Camera camera = Object.FindFirstObjectByType<Camera>();
             if (camera != null)
             {
