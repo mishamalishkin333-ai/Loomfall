@@ -85,6 +85,9 @@ node C:\Unity\tools\serve.mjs C:\Unity\Loomfall\docs 8082
 | Скорость бега на Shift | **6,32 м/с** при заданной 6,40 (80 замеров) — ровно вдвое быстрее |
 | Финал без условий | третья нить **отказывает**, концовка не выбирается |
 | Финал с условиями | при 4 осколках и 2 светильниках выбирается тайная концовка **«Третий узор»** |
+| Заставка до касания | видна, ввод заблокирован: сдвиг Ткача **0,0000 м** за 14 кадров подачи движения |
+| Заставка после касания | ввод принимается, ходьба идёт с обычной скоростью |
+| Проверка заставки и управления | **20 из 20** тестов (`LoomfallTouch.Run`) |
 | Светильники против Забвения | Забвение падает 0,15 → 0,00 после зажигания двух светильников |
 
 ## 5. Графика: что включено
@@ -119,26 +122,36 @@ node C:\Unity\tools\serve.mjs C:\Unity\Loomfall\docs 8082
 
 ## 7. Как повторить
 
-```
-# пересобрать игру и архив
-Unity.exe -batchmode -nographics -quit -projectPath <проект> \
-  -executeMethod Loomfall.EditorTools.LoomfallCore.SetupAndBuild -logfile build.log
+Команды для PowerShell — одной строкой, он не понимает перенос через `\`:
 
-# поднять статический сервер на архиве
+```
+# пересобрать сцену, игру и архив
+Unity.exe -batchmode -nographics -quit -projectPath <проект> -executeMethod Loomfall.EditorTools.LoomfallCore.SetupAndBuild -logfile build.log
+
+# поднять статический сервер на архиве (сначала папка, потом порт)
 node tools/serve.mjs <проект>/docs 4185
 
-# проверить в headless Chrome
-chrome --headless=new --disable-gpu --no-sandbox --dump-dom http://127.0.0.1:4185/
-chrome --headless=new --disable-gpu --no-sandbox --window-size=1280,720 \
-  --screenshot=shot.png http://127.0.0.1:4185/
+# проверить в headless Chrome (обязательна своя папка профиля)
+chrome --headless=new --disable-gpu --no-sandbox --user-data-dir=<папка профиля> --virtual-time-budget=30000 --window-size=1280,720 --screenshot=shot.png --dump-dom http://127.0.0.1:4185/
 
 # прогнать игру живьём (вход в play-режим и 600 кадров)
-Unity.exe -batchmode -projectPath <проект> \
-  -executeMethod Loomfall.EditorTools.LoomfallPlay.Run -logfile play.log
+Unity.exe -batchmode -projectPath <проект> -executeMethod Loomfall.EditorTools.LoomfallPlay.Run -logfile play.log
+
+# проверить управление, заставку и профиль качества (20 проверок)
+Unity.exe -batchmode -quit -projectPath <проект> -executeMethod Loomfall.EditorTools.LoomfallTouch.Run -logfile touch.log
 
 # проверить мост к площадкам на подставных SDK (15 проверок)
 node Tools/bridge-test.mjs
 
 # убедиться, что вызовы площадок попали в собранный движок
-# (файл Build/webgl.framework.js.unityweb сжат gzip — сначала распаковать)
+# (файлы Build/*.unityweb сжаты gzip — сначала распаковать)
 ```
+
+Две ловушки, на которых я уже спотыкался:
+
+- **Добавили компонент в построитель — пересоберите сцену** (`LoomfallRuntime.Setup`).
+  Иначе компонента в сцене нет, прогон покажет «заставки нет» и «ввод не блокируется»,
+  и это будет ложный результат, а не ошибка игры.
+- **Пакетный прогон идёт в тысячи кадров в секунду**: кадр длится доли миллисекунды,
+  поэтому проверки «через полсекунды» внутри прогона не наступают никогда. Такие
+  правила проверяются тестом (`IntroScreen.ShouldClose`), а сцена — вызовом `Dismiss()`.

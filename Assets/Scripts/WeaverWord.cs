@@ -41,6 +41,13 @@ namespace Loomfall
                 if (keyboard.fKey.wasPressedThisFrame) rift = true;
             }
 
+            // Заставка закрыта — только тогда Слово и Разрыв работают.
+            if (Loomfall.IntroScreen.BlocksInput)
+            {
+                word = false;
+                rift = false;
+            }
+
             if (word && Echo >= wordCost)
             {
                 Echo -= wordCost;

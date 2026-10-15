@@ -15,6 +15,7 @@ namespace Loomfall.EditorTools
         private static float speedSum;
         private static int speedCount;
         private static HeartChoice thirdThread;
+        private static Vector3 introStart;
         private static bool started;
 
         public static void Run()
@@ -131,11 +132,33 @@ namespace Loomfall.EditorTools
                 driver.touchMove = Vector2.zero;
                 driver.touchSprint = false;
 
-                if (frames == 15)
+                // Фаза заставки: ввод подаётся, но Ткач обязан стоять на месте.
+                if (frames >= 1 && frames < 15)
                 {
+                    driver.testMove = new Vector2(0f, 1f);
+                    if (frames == 1)
+                    {
+                        introStart = driver.transform.position;
+                        Debug.Log("[Loomfall] Заставка: видна — " + Loomfall.IntroScreen.BlocksInput
+                            + ", ввод игры заблокирован");
+                    }
+                }
+                else if (frames == 15)
+                {
+                    float underIntro = Vector3.Distance(introStart, driver.transform.position);
+                    Debug.Log("[Loomfall] Заставка: сдвиг Ткача под заставкой " + underIntro.ToString("F4")
+                        + " м за 14 кадров подачи движения");
+
+                    var intro = Loomfall.IntroScreen.Instance;
+                    if (intro != null) intro.Dismiss();
                     previousPosition = driver.transform.position;
                     speedSum = 0f;
                     speedCount = 0;
+                }
+                else if (frames == 16)
+                {
+                    Debug.Log("[Loomfall] Заставка: после закрытия ввод принимается — "
+                        + (Loomfall.IntroScreen.BlocksInput ? "нет" : "да"));
                 }
                 else if (Time.deltaTime > 0.000001f)
                 {

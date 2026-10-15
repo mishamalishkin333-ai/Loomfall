@@ -15,6 +15,9 @@ namespace Loomfall
 
         private void OnGUI()
         {
+            // На заставке экранный слой игрока не рисуется: она важнее.
+            if (Loomfall.IntroScreen.BlocksInput) return;
+
             if (title == null)
             {
                 title = new GUIStyle(GUI.skin.label);

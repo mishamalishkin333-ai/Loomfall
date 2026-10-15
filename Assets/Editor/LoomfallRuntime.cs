@@ -80,6 +80,12 @@ namespace Loomfall.EditorTools
 
             var hudObject = new GameObject("Интерфейс");
             var hud = hudObject.AddComponent<Loomfall.WeaverHud>();
+
+            // Заставка добавляется после слоя игрока: она рисуется поверх и держит ввод до касания.
+            if (hudObject.GetComponent<Loomfall.IntroScreen>() == null)
+            {
+                hudObject.AddComponent<Loomfall.IntroScreen>();
+            }
             hud.player = weaver.transform;
             hud.loom = loom.transform;
 

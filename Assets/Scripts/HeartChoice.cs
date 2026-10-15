@@ -29,6 +29,8 @@ namespace Loomfall
 
         private void Update()
         {
+            if (Loomfall.IntroScreen.BlocksInput) return;
+
             Keyboard keyboard = Keyboard.current;
             bool press = testPress;
             testPress = false;

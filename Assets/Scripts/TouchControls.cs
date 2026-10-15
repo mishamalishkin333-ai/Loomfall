@@ -51,6 +51,15 @@ namespace Loomfall
             // а в проверках — пробный ввод. Иначе чужие значения затирались бы каждый кадр.
             if (weaver == null || screen == null) return;
 
+            // На заставке кнопки не работают: касание только закрывает её.
+            if (IntroScreen.BlocksInput)
+            {
+                weaver.touchMove = Vector2.zero;
+                weaver.touchJump = false;
+                weaver.touchSprint = false;
+                return;
+            }
+
             Vector2 jumpCenter;
             Vector2 threadCenter;
             Vector2 wordCenter;
@@ -136,7 +145,7 @@ namespace Loomfall
 
         private void OnGUI()
         {
-            if (!IsTouchDevice() || weaver == null) return;
+            if (!IsTouchDevice() || weaver == null || IntroScreen.BlocksInput) return;
 
             Vector2 jump;
             Vector2 thread;

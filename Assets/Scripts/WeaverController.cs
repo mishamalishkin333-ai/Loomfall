@@ -75,6 +75,14 @@ namespace Loomfall
                 jump = keyboard.spaceKey.wasPressedThisFrame;
             }
 
+            // Пока видна заставка, Ткач стоит на месте: ввод не принимается.
+            if (Loomfall.IntroScreen.BlocksInput)
+            {
+                move = Vector2.zero;
+                sprint = false;
+                jump = false;
+            }
+
             if (move.sqrMagnitude > 1f) move.Normalize();
             float speed = move.magnitude * (sprint ? runSpeed : walkSpeed);
 

@@ -52,6 +52,11 @@ namespace Loomfall.EditorTools
             Check("компьютер без профиля PC — берём мобильный", Loomfall.GameSession.ChooseLevel(false, new[] { "Mobile" }) == 0);
             Check("пустой список профилей — ничего не выбираем", Loomfall.GameSession.ChooseLevel(true, new string[0]) == -1);
 
+            Check("заставка: без нажатия не закрывается", !Loomfall.IntroScreen.ShouldClose(false, 5f));
+            Check("заставка: случайное касание сразу после загрузки не закрывает", !Loomfall.IntroScreen.ShouldClose(true, 0.1f));
+            Check("заставка: нажатие через полсекунды закрывает", Loomfall.IntroScreen.ShouldClose(true, 0.5f));
+            Check("заставка: ровно на пороге закрывает", Loomfall.IntroScreen.ShouldClose(true, 0.35f));
+
             Debug.Log("[Loomfall] Сенсорное управление: успешно " + passed + ", сбоев " + failed);
             EditorApplication.Exit(failed == 0 ? 0 : 1);
         }
