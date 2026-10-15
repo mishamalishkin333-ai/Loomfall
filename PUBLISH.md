@@ -40,7 +40,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File publish.ps1 -DryRun
 
 ```
 cd C:\Unity\Loomfall
-git remote add origin https://github.com/mishamalishkin333-ai/loomfall.git
+git remote add origin https://github.com/mishamalishkin333-ai/Loomfall.git
 git push -u origin main
 ```
 
@@ -58,7 +58,7 @@ git push -u origin main
 
 ```
 cd C:\Unity\Loomfall
-git remote add origin https://github.com/mishamalishkin333-ai/loomfall.git
+git remote add origin https://github.com/mishamalishkin333-ai/Loomfall.git
 git push -u origin main
 ```
 
@@ -89,13 +89,13 @@ Settings → Pages → Source: **Deploy from a branch** → Branch: **main**, п
 Через 1–2 минуты сайт будет доступен по адресу:
 
 ```
-https://mishamalishkin333-ai.github.io/loomfall/
+https://mishamalishkin333-ai.github.io/Loomfall/
 ```
 
 Политика конфиденциальности (обязательна для VK):
 
 ```
-https://mishamalishkin333-ai.github.io/loomfall/privacy.html
+https://mishamalishkin333-ai.github.io/Loomfall/privacy.html
 ```
 
 ## Шаг 3. Карточка приложения в VK
@@ -103,8 +103,8 @@ https://mishamalishkin333-ai.github.io/loomfall/privacy.html
 | Поле VK | Что вписать |
 |---|---|
 | Название | Ткач Ярусов (Loomfall) |
-| Адрес приложения | `https://mishamalishkin333-ai.github.io/loomfall/` |
-| Адрес политики конфиденциальности | `https://mishamalishkin333-ai.github.io/loomfall/privacy.html` |
+| Адрес приложения | `https://mishamalishkin333-ai.github.io/Loomfall/` |
+| Адрес политики конфиденциальности | `https://mishamalishkin333-ai.github.io/Loomfall/privacy.html` |
 | Платформа | HTML5 (Web) |
 | Категория | Игры → Приключения |
 | Возраст | 12+ (атмосферная тема, без жестокости) |

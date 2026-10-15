@@ -113,8 +113,8 @@ Unity.exe -batchmode -nographics -quit -projectPath . -executeMethod Loomfall.Ed
 
 Порядок публикации, поля карточки VK и ссылки для неё — в [PUBLISH.md](PUBLISH.md).
 Коротко: репозиторий на GitHub, Pages из папки `docs`, затем адрес приложения
-`https://mishamalishkin333-ai.github.io/loomfall/` и политика конфиденциальности
-`https://mishamalishkin333-ai.github.io/loomfall/privacy.html`.
+`https://mishamalishkin333-ai.github.io/Loomfall/` и политика конфиденциальности
+`https://mishamalishkin333-ai.github.io/Loomfall/privacy.html`.
 
 Проверить готовность к публикации, ничего не публикуя:
 
