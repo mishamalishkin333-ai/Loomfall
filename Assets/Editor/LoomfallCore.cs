@@ -116,9 +116,24 @@ namespace Loomfall.EditorTools
             EnsureFolder("Assets/Art");
             EnsureFolder(ProfilesFolder);
 
-            var profile = ScriptableObject.CreateInstance<VolumeProfile>();
             string profilePath = $"{ProfilesFolder}/LoomfallProfile.asset";
-            AssetDatabase.CreateAsset(profile, profilePath);
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            if (profile == null)
+            {
+                profile = ScriptableObject.CreateInstance<VolumeProfile>();
+                AssetDatabase.CreateAsset(profile, profilePath);
+            }
+            else
+            {
+                // Профиль уже существует: чистим настройки, чтобы они не удваивались,
+                // и сохраняем тот же файл, иначе ссылка из сцены может потеряться.
+                for (int i = profile.components.Count - 1; i >= 0; i--)
+                {
+                    UnityEngine.Object.DestroyImmediate(profile.components[i], true);
+                }
+
+                profile.components.Clear();
+            }
 
             var tonemapping = profile.Add<Tonemapping>(true);
             tonemapping.mode.Override(TonemappingMode.ACES);
@@ -200,15 +215,29 @@ namespace Loomfall.EditorTools
             }
 
             var volume = UnityEngine.Object.FindFirstObjectByType<Volume>();
+            var cameraData = camera.GetUniversalAdditionalCameraData();
+            bool postWasOn = cameraData == null || cameraData.renderPostProcessing;
+
             FrameStats withPost = RenderShot(camera, "C:/Unity/shots/preview.png", 1600, 900);
             Debug.Log($"[Loomfall] Кадр с постобработкой: {withPost}");
 
-            if (volume != null)
+            if (cameraData != null)
             {
-                volume.enabled = false;
+                // Флаг на камере читается при рендере сразу, в отличие от компонента Volume:
+                // менеджер томов перечитывает состояние раз в кадр, поэтому отключение тома
+                // в том же кадре не давало разницы.
+                cameraData.renderPostProcessing = false;
                 FrameStats without = RenderShot(camera, "C:/Unity/shots/preview-nopost.png", 1600, 900);
-                volume.enabled = true;
+                cameraData.renderPostProcessing = postWasOn;
                 Debug.Log($"[Loomfall] Кадр без постобработки: {without}");
+                Debug.Log("[Loomfall] Разница кадров: яркость "
+                    + Math.Round(withPost.Mean - without.Mean, 2)
+                    + ", разброс " + Math.Round(withPost.Deviation - without.Deviation, 2)
+                    + ", оттенков " + (withPost.Colors - without.Colors));
+            }
+            else if (volume != null)
+            {
+                Debug.Log("[Loomfall] Постобработка: на камере нет данных URP, сравнение пропущено");
             }
         }
 
