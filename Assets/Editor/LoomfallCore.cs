@@ -26,6 +26,7 @@ namespace Loomfall.EditorTools
         public static void SetupAndBuild()
         {
             ConfigureProject();
+            FixPlugins();
             BuildWebGL(new[] { ScenePath });
         }
 
@@ -33,7 +34,43 @@ namespace Loomfall.EditorTools
         public static void BuildOnly()
         {
             ConfigureProject();
+            FixPlugins();
             BuildWebGL(new[] { ScenePath });
+        }
+
+        /// <summary>
+        /// Мост к площадкам должен быть включён как плагин WebGL. Если у файла нет
+        /// метаданных плагина, Unity молча не берёт его в сборку, и игра остаётся
+        /// без VK Bridge и Яндекс Игр. Здесь плагин переимпортируется и включается.
+        /// </summary>
+        public static void FixPlugins()
+        {
+            const string assetPath = "Assets/Plugins/WebGL/LoomfallBridge.jslib";
+            const string metaPath = assetPath + ".meta";
+
+            if (!(AssetImporter.GetAtPath(assetPath) is PluginImporter))
+            {
+                AssetImporter current = AssetImporter.GetAtPath(assetPath);
+                Debug.Log("[Loomfall] Мост площадок: переимпорт плагина, был "
+                    + (current == null ? "не импортирован" : current.GetType().Name));
+                string fullMeta = Path.Combine(Directory.GetCurrentDirectory(), metaPath);
+                if (File.Exists(fullMeta)) File.Delete(fullMeta);
+                AssetDatabase.Refresh();
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            }
+
+            var importer = AssetImporter.GetAtPath(assetPath) as PluginImporter;
+            if (importer == null)
+            {
+                Debug.LogError("[Loomfall] Мост площадок: файл так и не распознан как плагин, площадки не заработают");
+                return;
+            }
+
+            importer.SetCompatibleWithAnyPlatform(false);
+            importer.SetCompatibleWithEditor(false);
+            importer.SetCompatibleWithPlatform(BuildTarget.WebGL, true);
+            importer.SaveAndReimport();
+            Debug.Log("[Loomfall] Мост площадок: плагин включён для WebGL (" + assetPath + ")");
         }
 
         /// <summary>Настройки проекта: качество, звук, плеер, параметры WebGL.</summary>

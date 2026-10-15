@@ -41,6 +41,12 @@
 | Упоминаний «Error» | **0** |
 | Снимок экрана | 1280×720, яркость 42,3 из 255, оттенков **77** — кадр не пустой |
 | Повтор после включения сглаживания | те же значения, ошибок нет |
+| Вызовы площадок в собранном движке | `VKWebAppInit`, `VKWebAppStorageGet`, `VKWebAppStorageSet`, `VKWebAppShowNativeAds`, `LoadingAPI`, `showRewardedVideo` — все по 1 |
+| Проверка моста к площадкам | **15 из 15** на подставных SDK (`node Tools/bridge-test.mjs`) |
+
+Вызовы площадок проверяются в собранном файле `Build/webgl.framework.js.unityweb`.
+Он сжат gzip, поэтому сначала распаковывается, иначе поиск по тексту ничего не найдёт
+(на этом я один раз уже ошибся, решив, что интеграции нет).
 
 ## 4. Игра в запущенном виде (живой прогон, 600 кадров)
 
@@ -108,4 +114,10 @@ chrome --headless=new --disable-gpu --no-sandbox --window-size=1280,720 \
 # прогнать игру живьём (вход в play-режим и 600 кадров)
 Unity.exe -batchmode -projectPath <проект> \
   -executeMethod Loomfall.EditorTools.LoomfallPlay.Run -logfile play.log
+
+# проверить мост к площадкам на подставных SDK (15 проверок)
+node Tools/bridge-test.mjs
+
+# убедиться, что вызовы площадок попали в собранный движок
+# (файл Build/webgl.framework.js.unityweb сжат gzip — сначала распаковать)
 ```
