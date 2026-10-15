@@ -45,6 +45,13 @@ namespace Loomfall.EditorTools
             Check("промах мимо кнопки", !Loomfall.TouchControls.InCircle(new Vector2(400f, 500f), center, radius));
             Check("на самой границе кнопки — попадание", Loomfall.TouchControls.InCircle(center + new Vector2(radius, 0f), center, radius));
 
+            string[] levels = { "Mobile", "PC" };
+            Check("телефон — профиль качества Mobile", Loomfall.GameSession.ChooseLevel(true, levels) == 0);
+            Check("компьютер — профиль качества PC", Loomfall.GameSession.ChooseLevel(false, levels) == 1);
+            Check("телефон без мобильного профиля — берём PC", Loomfall.GameSession.ChooseLevel(true, new[] { "PC" }) == 0);
+            Check("компьютер без профиля PC — берём мобильный", Loomfall.GameSession.ChooseLevel(false, new[] { "Mobile" }) == 0);
+            Check("пустой список профилей — ничего не выбираем", Loomfall.GameSession.ChooseLevel(true, new string[0]) == -1);
+
             Debug.Log("[Loomfall] Сенсорное управление: успешно " + passed + ", сбоев " + failed);
             EditorApplication.Exit(failed == 0 ? 0 : 1);
         }

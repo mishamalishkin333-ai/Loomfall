@@ -19,12 +19,42 @@ namespace Loomfall
         private void Awake()
         {
             Instance = this;
+            ApplyDeviceQuality();
             PlatformBridge.Init();
             Tier = ReadInt("tier", 1);
             Threads = ReadInt("threads", 0);
             Shards = ReadInt("shards", 0);
             Ending = PlatformBridge.Load("ending", string.Empty);
             Debug.Log("[Loomfall] Ярус " + Tier + ", нитей натянуто " + Threads);
+        }
+
+        /// <summary>
+        /// Профиль качества по устройству: на телефоне легче (без сглаживания, ближе тени),
+        /// на компьютере полный. Названия профилей задаются в настройках качества проекта.
+        /// </summary>
+        public static int ChooseLevel(bool touch, string[] names)
+        {
+            int mobile = -1;
+            int desktop = -1;
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (names[i] == "Mobile") mobile = i;
+                else if (names[i] == "PC") desktop = i;
+            }
+
+            if (touch) return mobile >= 0 ? mobile : desktop;
+            return desktop >= 0 ? desktop : mobile;
+        }
+
+        private static void ApplyDeviceQuality()
+        {
+            bool touch = Touchscreen.current != null;
+            string[] names = QualitySettings.names;
+            int level = ChooseLevel(touch, names);
+            string name = level >= 0 ? names[level] : "не найден";
+            if (level >= 0) QualitySettings.SetQualityLevel(level, true);
+            Debug.Log("[Loomfall] Качество: " + name + ", сенсорный экран: " + (touch ? "да" : "нет")
+                + ", уровней в проекте: " + names.Length);
         }
 
         private void Update()
