@@ -63,6 +63,14 @@ namespace Loomfall
                     accent);
             }
 
+            if (session != null && session.CodexOpen)
+            {
+                GUI.Label(
+                    new Rect(28f, 254f, 1300f, 400f),
+                    "Кодекс — собранные записи:\n" + session.CodexLog + "\n\n«Tab» — закрыть",
+                    accent);
+            }
+
             if (session != null && !string.IsNullOrEmpty(session.Ending))
             {
                 GUI.Label(

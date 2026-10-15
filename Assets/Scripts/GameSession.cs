@@ -30,7 +30,9 @@ namespace Loomfall
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null || player == null || loom == null) return;
+            if (keyboard == null) return;
+            if (keyboard.tabKey.wasPressedThisFrame) CodexOpen = !CodexOpen;
+            if (player == null || loom == null) return;
             if (keyboard.rKey.wasPressedThisFrame)
             {
                 // Награждаемая реклама площадки: в VK это VKWebAppShowNativeAds, в Яндексе — showFullscreenAdv.
@@ -68,12 +70,16 @@ namespace Loomfall
         public int Shards { get; private set; }
         public string Codex { get; private set; } = string.Empty;
         public float CodexTime { get; private set; }
+        public string CodexLog { get; private set; } = string.Empty;
+        public bool CodexOpen { get; private set; }
 
         /// <summary>Осколок памяти: чужая жизнь, запись в Кодексе и никакой пользы в бою.</summary>
         public void CollectShard(string record)
         {
             Shards++;
             Codex = record;
+            if (CodexLog.Length == 0) CodexLog = record;
+            else if (!CodexLog.Contains(record)) CodexLog = CodexLog + "\n" + record;
             CodexTime = Time.time;
             PlatformBridge.Save("shards", Shards.ToString());
             Debug.Log("[Loomfall] Записей в Кодексе: " + Shards);
