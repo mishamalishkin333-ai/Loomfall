@@ -121,3 +121,10 @@ Unity.exe -batchmode -nographics -quit -projectPath . -executeMethod Loomfall.Ed
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File publish.ps1 -DryRun
 ```
+
+Опубликовать можно тремя путями: через `gh` (одна команда), через `git` (добавить
+`origin` и запушить `main`) или **вообще без консоли** — создать пустой репозиторий на
+сайте и перетащить в него содержимое папки `docs`. Все три описаны в [PUBLISH.md](PUBLISH.md).
+
+Сборка самодостаточна: `docs/` не ссылается ни на что за своими пределами — это
+проверено запросом всех 18 файлов архива (все 200, без сжатия).

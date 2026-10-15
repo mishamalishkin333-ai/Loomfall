@@ -57,6 +57,70 @@ namespace Loomfall.EditorTools
             Check("заставка: нажатие через полсекунды закрывает", Loomfall.IntroScreen.ShouldClose(true, 0.5f));
             Check("заставка: ровно на пороге закрывает", Loomfall.IntroScreen.ShouldClose(true, 0.35f));
 
+            // Раскладка кнопок на телефоне: не вылезать за экран, не пересекаться, быть крупными.
+            var sizes = new[]
+            {
+                new Vector2(360f, 640f), new Vector2(640f, 360f), new Vector2(320f, 568f),
+                new Vector2(1280f, 720f), new Vector2(2400f, 1080f)
+            };
+            bool inside = true;
+            bool apart = true;
+            bool big = true;
+            bool clear = true;
+            string worst = "нет";
+            foreach (Vector2 size in sizes)
+            {
+                Vector2 jump;
+                Vector2 thread;
+                Vector2 word;
+                Vector2 rift;
+                float r = Loomfall.TouchControls.Layout(size.x, size.y, 0.075f, out jump, out thread, out word, out rift);
+                Vector2[] points = { jump, thread, word, rift };
+
+                foreach (Vector2 point in points)
+                {
+                    if (point.x - r < 0f || point.y - r < 0f || point.x + r > size.x || point.y + r > size.y)
+                    {
+                        inside = false;
+                        worst = size.ToString("F0") + " кнопка " + point.ToString("F0");
+                    }
+                }
+
+                for (int i = 0; i < points.Length; i++)
+                {
+                    for (int j = i + 1; j < points.Length; j++)
+                    {
+                        if (Vector2.Distance(points[i], points[j]) < r * 2f)
+                        {
+                            apart = false;
+                            worst = size.ToString("F0") + " пара " + i + "/" + j;
+                        }
+                    }
+                }
+
+                if (r * 2f < 44f)
+                {
+                    big = false;
+                    worst = size.ToString("F0") + " поперечник " + (r * 2f).ToString("F1");
+                }
+
+                // Круг хождения под большим пальцем не должен налезать на кнопки.
+                float stickR = Mathf.Min(size.x, size.y) * 0.15f;
+                float stickEdge = stickR * 1.3f + stickR;
+                float nearestButton = Mathf.Min(Mathf.Min(points[0].x, points[1].x), Mathf.Min(points[2].x, points[3].x)) - r;
+                if (stickEdge > nearestButton)
+                {
+                    clear = false;
+                    worst = size.ToString("F0") + " круг хождения " + stickEdge.ToString("F0")
+                        + " против кнопок " + nearestButton.ToString("F0");
+                }
+            }
+
+            Check("кнопки не вылезают за экран на всех размерах", inside, worst);
+            Check("кнопки не перекрывают друг друга", apart, worst);
+            Check("кнопки не мельче 44 точек в поперечнике", big, worst);
+            Check("круг хождения не налезает на кнопки", clear, worst);
+
             Debug.Log("[Loomfall] Сенсорное управление: успешно " + passed + ", сбоев " + failed);
             EditorApplication.Exit(failed == 0 ? 0 : 1);
         }

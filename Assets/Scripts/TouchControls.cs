@@ -116,19 +116,28 @@ namespace Loomfall
             if (thread || word) PressThreads();
         }
 
-        /// <summary>Круги кнопок на экране: возвращает радиус, остальное через out.</summary>
-        private float Layout(out Vector2 jump, out Vector2 thread, out Vector2 word, out Vector2 rift)
+        /// <summary>
+        /// Круги кнопок на экране. Считается от размеров экрана, а не от Screen напрямую,
+        /// чтобы раскладку можно было проверить тестом на разных телефонах.
+        /// </summary>
+        public static float Layout(float width, float height, float buttonRadius, out Vector2 jump, out Vector2 thread, out Vector2 word, out Vector2 rift)
         {
-            float unit = Mathf.Min(Screen.width, Screen.height);
+            float unit = Mathf.Min(width, height);
             float buttonR = unit * buttonRadius;
-            float right = Screen.width - buttonR * 1.6f;
-            float bottom = Screen.height - buttonR * 1.6f;
+            float right = width - buttonR * 1.6f;
+            float bottom = height - buttonR * 1.6f;
 
             jump = new Vector2(right, bottom);
             thread = new Vector2(right - buttonR * 2.6f, bottom);
             word = new Vector2(right, bottom - buttonR * 2.6f);
             rift = new Vector2(right - buttonR * 2.6f, bottom - buttonR * 2.6f);
             return buttonR;
+        }
+
+        /// <summary>Круги кнопок для текущего экрана.</summary>
+        private float Layout(out Vector2 jump, out Vector2 thread, out Vector2 word, out Vector2 rift)
+        {
+            return Layout(Screen.width, Screen.height, buttonRadius, out jump, out thread, out word, out rift);
         }
 
         private static void PressThreads()

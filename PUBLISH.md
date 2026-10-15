@@ -23,6 +23,27 @@ powershell -NoProfile -ExecutionPolicy Bypass -File publish.ps1 -DryRun
 
 После этого я создаю репозиторий и включаю Pages одной командой.
 
+Вариант Б (совсем без консоли, только браузер):
+
+1. На github.com: **New repository** → имя `loomfall` → Public → **Create**.
+2. На странице пустого репозитория: **uploading an existing file**.
+3. Откройте в проводнике папку `C:\Unity\Loomfall\docs`, выделите **всё** (Ctrl+A) и
+   перетащите в окно загрузки. Папки `Build` и `TemplateData` перетаскивайте целиком —
+   GitHub сохранит их структуру.
+4. Внизу: **Commit changes**. Файлы лягут в корень репозитория.
+5. **Settings → Pages → Source: Deploy from a branch → Branch: main, папка / (root)** → Save.
+
+Обратите внимание: если файлы лежат в корне репозитория, папка для Pages — `/ (root)`,
+а не `/docs`. Оба пути одинаково рабочие, отличается только настройка.
+
+Вариант В (через консоль, но без `gh`):
+
+```
+cd C:\Unity\Loomfall
+git remote add origin https://github.com/ВАШ_НИК/loomfall.git
+git push -u origin main
+```
+
 Вариант Б (вы делаете сами):
 
 ```
@@ -34,6 +55,7 @@ git push -u origin main
 ## Шаг 2. Включить GitHub Pages
 
 Settings → Pages → Source: **Deploy from a branch** → Branch: **main**, папка **/docs** → Save.
+(Если вы загружали файлы через браузер в корень репозитория — папка **/ (root)**.)
 
 Через 1–2 минуты сайт будет доступен по адресу:
 
