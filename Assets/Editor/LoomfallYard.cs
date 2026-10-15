@@ -83,6 +83,8 @@ namespace Loomfall.EditorTools
             Animator animator = weaver.GetComponent<Animator>();
             if (animator == null) animator = weaver.AddComponent<Animator>();
             animator.runtimeAnimatorController = LoomfallHeroAnim.EnsureController();
+            // Root motion выключен: иначе анимация сама тянет героя в позицию клипа и перебивает постройку.
+            animator.applyRootMotion = false;
 
             Camera camera = LoomfallStudio.MakeCamera(
                 "КамераИгрока",

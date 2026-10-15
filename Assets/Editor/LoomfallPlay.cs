@@ -48,7 +48,10 @@ namespace Loomfall.EditorTools
                     Debug.Log("[Loomfall] Разбор: объект «" + hero.name + "», родитель «" + parent
                         + "», мировые " + t.position.ToString("F2") + ", локальные " + t.localPosition.ToString("F2"));
                     Debug.Log("[Loomfall] Разбор: детей " + t.childCount + ", Animator "
-                        + (hero.GetComponent<Animator>() != null ? "на себе" : "нет"));
+                        + (hero.GetComponent<Animator>() != null ? "на себе" : "нет")
+                        + ", root motion " + (hero.GetComponent<Animator>() != null
+                            ? hero.GetComponent<Animator>().applyRootMotion.ToString()
+                            : "нет аниматора"));
 
                     for (int i = 0; i < t.childCount && i < 4; i++)
                     {
@@ -70,6 +73,36 @@ namespace Loomfall.EditorTools
 
                 var anim = Object.FindObjectOfType<Animator>();
                 Debug.Log("[Loomfall] Разбор: первый Animator на «" + (anim != null ? anim.name : "нет") + "»");
+
+                int heroCount = 0;
+                foreach (GameObject candidate in Object.FindObjectsOfType<GameObject>())
+                {
+                    if (candidate.name.IndexOf("characterMedium", System.StringComparison.Ordinal) < 0) continue;
+                    heroCount++;
+                    Debug.Log("[Loomfall] Разбор: кандидат «" + candidate.name + "» родитель «"
+                        + (candidate.transform.parent != null ? candidate.transform.parent.name : "нет")
+                        + "» локально " + candidate.transform.localPosition.ToString("F2")
+                        + " мир " + candidate.transform.position.ToString("F2")
+                        + " аниматор " + (candidate.GetComponent<Animator>() != null)
+                        + " контроллер " + (candidate.GetComponent<Loomfall.WeaverController>() != null));
+                }
+
+                Debug.Log("[Loomfall] Разбор: всего объектов с именем героя " + heroCount
+                    + ", компонентов управления " + Object.FindObjectsOfType<Loomfall.WeaverController>().Length);
+
+                var loaded = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                Debug.Log("[Loomfall] Разбор: активная сцена «" + loaded.name + "», путь «" + loaded.path
+                    + "», корневых объектов " + loaded.GetRootGameObjects().Length
+                    + ", сцена героя «" + Object.FindObjectOfType<Loomfall.WeaverController>().gameObject.scene.name + "»");
+
+                var keys = UnityEngine.InputSystem.Keyboard.current;
+                Debug.Log("[Loomfall] Разбор: клавиатура " + (keys != null ? "есть" : "нет")
+                    + (keys != null
+                        ? ", W " + keys.wKey.isPressed + ", S " + keys.sKey.isPressed
+                            + ", A " + keys.aKey.isPressed + ", D " + keys.dKey.isPressed
+                            + ", пробел " + keys.spaceKey.isPressed
+                        : "")
+                    + ", кадров " + Time.frameCount + ", шаг " + Time.deltaTime.ToString("F4"));
             }
 
             if (frames < 120) return;

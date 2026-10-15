@@ -19,6 +19,20 @@ namespace Loomfall
         private void Awake()
         {
             animator = GetComponent<Animator>();
+            // Анимация не должна двигать Ткача: позицию держит только этот контроллер.
+            if (animator != null) animator.applyRootMotion = false;
+        }
+
+        private void Start()
+        {
+            // Опираемся на пол под героем: сцена могла сохранить позицию от прежней постройки.
+            Vector3 start = transform.position;
+            if (Physics.Raycast(start + Vector3.up * 8f, Vector3.down, out RaycastHit ground, 40f))
+            {
+                transform.position = new Vector3(start.x, ground.point.y, start.z);
+                Debug.Log("[Loomfall] Ткач встал на пол: " + transform.position.ToString("F2")
+                    + " (было " + start.ToString("F2") + ")");
+            }
         }
 
         private void Update()
