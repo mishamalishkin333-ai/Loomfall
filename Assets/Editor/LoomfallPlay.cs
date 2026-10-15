@@ -116,30 +116,30 @@ namespace Loomfall.EditorTools
             var driver = Loomfall.WeaverController.Instance;
             if (driver != null)
             {
-                // Ведём Ткача вперёд, как если бы игрок держал «W».
-                driver.testMove = frames >= 10 && frames < 110 ? new Vector2(0f, 1f) : Vector2.zero;
-                maxY = Mathf.Max(maxY, driver.transform.position.y);
-                if (frames == 60) driver.testJump = true;
-
-                // Пробный сдвиг: если его тоже отменит, значит позицию возвращает кто-то другой.
-                if (frames == 70) driver.transform.position += new Vector3(0f, 0f, 0.5f);
-                if (frames == 80)
+                // Ведём узел вверх по ярусам шагами: высоту определяет настоящий код опоры на пол.
+                if (frames == 15)
                 {
-                    Debug.Log("[Loomfall] Прогон: пробный сдвиг на 0,5 м по Z дал " + driver.transform.position.ToString("F3"));
+                    Debug.Log("[Loomfall] Подъём: шагаем от двора к пятому ярусу, высоту решает опора на пол");
                 }
 
-                if (frames == 110)
+                driver.testMove = Vector2.zero;
+                if (frames >= 20 && frames < 380)
                 {
-                    float moved = (driver.transform.position - startPosition).magnitude;
-                    float elapsed = Time.time - startTime;
-                    Debug.Log("[Loomfall] Прогон: Ткач прошёл " + moved.ToString("F3") + " м за " + elapsed.ToString("F3")
-                        + " с, скорость " + (elapsed > 0.0001f ? (moved / elapsed).ToString("F2") : "?")
-                        + " м/с при заданной ходьбе " + driver.walkSpeed.ToString("F2")
-                        + ", сдвиг по Z " + (driver.transform.position.z - startPosition.z).ToString("F3"));
+                    // Только вперёд: высоту подъёма на пандусах решает опора на пол.
+                    driver.transform.position += new Vector3(0f, 0f, 0.5f);
+                }
+
+                maxY = Mathf.Max(maxY, driver.transform.position.y);
+
+                if (frames >= 40 && frames % 40 == 0)
+                {
+                    Debug.Log("[Loomfall] Подъём: кадр " + frames
+                        + ", позиция " + driver.transform.position.ToString("F2")
+                        + ", выше всего " + maxY.ToString("F2"));
                 }
             }
 
-            if (frames < 120) return;
+            if (frames < 400) return;
 
             var player = Loomfall.WeaverController.Instance;
             var session = GameSession.Instance;
@@ -151,7 +151,8 @@ namespace Loomfall.EditorTools
             Debug.Log("[Loomfall] Прогон: кадров " + frames
                 + ", Ткач на " + (player != null ? player.transform.position.ToString("F2") : "не найден")
                 + ", сдвиг " + (player != null ? (player.transform.position - startPosition).magnitude.ToString("F3") : "?")
-                + ", выше всего " + maxY.ToString("F2"));
+                + ", выше всего " + maxY.ToString("F2")
+                + (maxY >= 17f ? " — вершина достигнута" : " — до вершины не дошёл"));
             Debug.Log("[Loomfall] Прогон: ход игры — " + (session != null)
                 + ", часов Забвения " + (clock != null ? clock.Oblivion.ToString("F3") : "нет")
                 + ", осколков в мире " + shards + ", светильников " + lamps + ", нитей " + threads);
