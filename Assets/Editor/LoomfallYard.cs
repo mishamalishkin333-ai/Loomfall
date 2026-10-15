@@ -326,6 +326,66 @@ namespace Loomfall.EditorTools
                 Debug.Log("[Loomfall] Подъём ещё выше: z " + probe.ToString("F1") + " -> высота " + height.ToString("F2"));
             }
 
+            // Пятый ярус: последний подъём, вершина мира.
+            const float level5 = 17.6f;
+            float up5Start = up4Start + tile * 7f;
+            var upper5 = new GameObject("ПятыйЯрус");
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int z = 0; z < 4; z++)
+                {
+                    LoomfallStudio.Place(upper5, floor, cave, new Vector3(x * tile - tile, level5, up5Start + z * tile), 0f);
+                }
+            }
+
+            for (int z = 0; z < 4; z++)
+            {
+                LoomfallStudio.Place(upper5, wall, cave, new Vector3(-tile * 2f, level5, up5Start + z * tile), 0f);
+                LoomfallStudio.Place(upper5, wall, cave, new Vector3(tile * 2f, level5, up5Start + z * tile), 0f);
+            }
+
+            var ramp5 = new GameObject("ПандусНаПятыйЯрус");
+            ramp5.transform.position = new Vector3(0f, (level4 + level5) * 0.5f, up4Start + tile * 5f + tile);
+            ramp5.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
+            ramp5.AddComponent<BoxCollider>().size = new Vector3(tile * 2.5f, 0.4f, 11f);
+
+            var floor5 = new GameObject("ПолПятогоЯруса");
+            floor5.transform.position = new Vector3(0f, level5 - 0.05f, up5Start + tile * 1.5f);
+            floor5.AddComponent<BoxCollider>().size = new Vector3(3f * tile + 2f, 0.1f, 4f * tile + 4f);
+
+            GameObject lamp5 = LoomfallStudio.Place(
+                upper5,
+                LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
+                cave,
+                new Vector3(0f, level5 + 1.8f, up5Start + tile * 2.5f),
+                0f);
+            if (lamp5 != null)
+            {
+                var anchor5 = lamp5.AddComponent<Loomfall.LampAnchor>();
+                anchor5.player = weaver.transform;
+            }
+
+            var shard5 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            shard5.name = "Осколок-8";
+            shard5.transform.position = new Vector3(0f, level5 + 1.1f, up5Start + tile * 1.5f);
+            shard5.transform.localScale = Vector3.one * 0.45f;
+            var shard5Part = shard5.AddComponent<Loomfall.MemoryShard>();
+            shard5Part.player = weaver.transform;
+            shard5Part.index = 7;
+
+            float[] probes5 = { up4Start + tile * 5f + tile * 0.5f, up5Start + tile * 1.5f };
+            foreach (float probe in probes5)
+            {
+                float height = 0f;
+                if (Physics.Raycast(new Vector3(0f, level5 + 6f, probe), Vector3.down, out RaycastHit probe5Hit, 32f))
+                {
+                    height = probe5Hit.point.y;
+                }
+
+                Debug.Log("[Loomfall] Подъём на вершину: z " + probe.ToString("F1") + " -> высота " + height.ToString("F2"));
+            }
+
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
