@@ -152,11 +152,45 @@ namespace Loomfall.EditorTools
 
             var upperShard = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             upperShard.name = "Осколок-5";
-            upperShard.transform.position = new Vector3(upOffset - tile, level + 1.1f, upStart + tile * 5f);
+            upperShard.transform.position = new Vector3(upOffset - tile, upperLevel + 1.1f, upStart + tile * 5f);
             upperShard.transform.localScale = Vector3.one * 0.45f;
             var upperShardPart = upperShard.AddComponent<Loomfall.MemoryShard>();
             upperShardPart.player = weaver.transform;
             upperShardPart.index = 4;
+
+            // Стены-коллайдеры: сквозь кладку Ткач больше не проходит, проход для пандуса открыт.
+            var wallWest = new GameObject("СтенаЗапад");
+            wallWest.transform.position = new Vector3(-TilesX * tile * 0.5f - 0.5f, 1.5f, 0f);
+            wallWest.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, TilesZ * tile + 2f);
+
+            var wallEast = new GameObject("СтенаВосток");
+            wallEast.transform.position = new Vector3(TilesX * tile * 0.5f + 0.5f, 1.5f, 0f);
+            wallEast.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, TilesZ * tile + 2f);
+
+            var wallUpperWest = new GameObject("СтенаЯрусаЗапад");
+            wallUpperWest.transform.position = new Vector3(-upOffset - tile - 0.5f, upperLevel + 1.5f, upStart + upZ * tile * 0.5f);
+            wallUpperWest.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, upZ * tile + 2f);
+
+            var wallUpperEast = new GameObject("СтенаЯрусаВосток");
+            wallUpperEast.transform.position = new Vector3(upOffset + tile + 0.5f, upperLevel + 1.5f, upStart + upZ * tile * 0.5f);
+            wallUpperEast.AddComponent<BoxCollider>().size = new Vector3(1f, 3f, upZ * tile + 2f);
+
+            var wallUpperFar = new GameObject("СтенаЯрусаТорец");
+            wallUpperFar.transform.position = new Vector3(0f, upperLevel + 1.5f, upStart + upZ * tile + 0.5f);
+            wallUpperFar.AddComponent<BoxCollider>().size = new Vector3(upX * tile + 2f, 3f, 1f);
+
+            // Замер подъёма: высота земли вдоль пандуса обязана расти от двора к верхнему ярусу.
+            float[] probes = { startZ - tile, startZ + tile * 0.5f, startZ + tile * 2f, startZ + tile * 3f, upStart + tile * 2f };
+            foreach (float probe in probes)
+            {
+                float height = 0f;
+                if (Physics.Raycast(new Vector3(0f, upperLevel + 6f, probe), Vector3.down, out RaycastHit probeHit, 20f))
+                {
+                    height = probeHit.point.y;
+                }
+
+                Debug.Log("[Loomfall] Подъём: z " + probe.ToString("F1") + " -> высота " + height.ToString("F2"));
+            }
 
             }
 
