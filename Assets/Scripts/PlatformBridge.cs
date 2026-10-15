@@ -9,6 +9,7 @@ namespace Loomfall
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")] private static extern void LoomfallInit();
+        [DllImport("__Internal")] private static extern void LoomfallReady();
         [DllImport("__Internal")] private static extern IntPtr LoomfallStorageGet(string key);
         [DllImport("__Internal")] private static extern void LoomfallStorageSet(string key, string value);
         [DllImport("__Internal")] private static extern void LoomfallFree(IntPtr pointer);
@@ -22,6 +23,20 @@ namespace Loomfall
             LoomfallInit();
 #else
             Debug.Log("[Loomfall] Площадка: локальный запуск");
+#endif
+        }
+
+        /// <summary>
+        /// Сообщает площадке, что игра готова. Вызывается после первого отрисованного кадра:
+        /// Яндекс убирает свой экран загрузки по этому сигналу, и раньше первого кадра
+        /// это давало чёрный всплеск.
+        /// </summary>
+        public static void Ready()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            LoomfallReady();
+#else
+            Debug.Log("[Loomfall] Площадка: готовность (локальный запуск)");
 #endif
         }
 

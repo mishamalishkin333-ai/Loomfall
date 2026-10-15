@@ -28,10 +28,6 @@ mergeInto(LibraryManager.library, {
           .then(function (sdk) {
             window.loomfallSdk = sdk;
 
-            // Яндексу обязательно нужно сообщить, что игра загрузилась, иначе
-            // площадка не уберёт свой экран загрузки.
-            try { sdk.features.LoadingAPI.ready(); } catch (e) { }
-
             return sdk.getPlayer({ scopes: false })
               .then(function (player) {
                 window.loomfallPlayer = player;
@@ -53,6 +49,23 @@ mergeInto(LibraryManager.library, {
       }
     } catch (e) {
       console.warn('[Loomfall] площадка недоступна: ' + e);
+    }
+  },
+
+  // Готовность площадке сообщается отдельно и позже — после первого отрисованного кадра.
+  // Раньше это делалось прямо при запуске: Яндекс мог убрать свой экран загрузки
+  // раньше, чем игра успевала что-то показать, и игрок видел чёрный кадр.
+  LoomfallReady: function () {
+    if (window.loomfallReadySent) return;
+    window.loomfallReadySent = true;
+    try {
+      var sdk = window.loomfallSdk;
+      if (sdk && sdk.features && sdk.features.LoadingAPI && sdk.features.LoadingAPI.ready) {
+        sdk.features.LoadingAPI.ready();
+        console.log('[Loomfall] Яндекс: игра готова');
+      }
+    } catch (e) {
+      console.warn('[Loomfall] готовность не отправлена: ' + e);
     }
   },
 

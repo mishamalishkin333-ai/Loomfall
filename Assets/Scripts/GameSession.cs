@@ -16,11 +16,12 @@ namespace Loomfall
         public int Tier { get; private set; } = 1;
         public int Threads { get; private set; }
 
+        private bool readySent;
+
         private void Awake()
         {
             Instance = this;
-            ApplyDeviceQuality();
-            PlatformBridge.Init();
+            ApplyDeviceQuality();            PlatformBridge.Init();
             Tier = ReadInt("tier", 1);
             Threads = ReadInt("threads", 0);
             Shards = ReadInt("shards", 0);
@@ -59,6 +60,15 @@ namespace Loomfall
 
         private void Update()
         {
+            // Площадке сообщаем о готовности после первого отрисованного кадра,
+            // а не при запуске: иначе экран загрузки убирается раньше первого кадра.
+            if (!readySent && Time.frameCount > 1)
+            {
+                readySent = true;
+                PlatformBridge.Ready();
+                Debug.Log("[Loomfall] Площадка: готовность отправлена на кадре " + Time.frameCount);
+            }
+
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
             if (keyboard.tabKey.wasPressedThisFrame) CodexOpen = !CodexOpen;

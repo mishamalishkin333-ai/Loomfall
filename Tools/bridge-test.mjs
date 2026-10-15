@@ -112,8 +112,16 @@ function loadLibrary(windowMock) {
 
   const methods = calls.map((c) => c.method);
   check('инициализация Яндекс Игр', methods.includes('YaGames.init'), methods.join(','));
-  check('площадке сообщено о загрузке (LoadingAPI.ready)', methods.includes('LoadingAPI.ready'), methods.join(','));
   check('прогресс читается из профиля игрока', methods.includes('player.getData'), methods.join(','));
+
+  // Готовность отправляется отдельным вызовом после первого кадра, а не при запуске.
+  check('о загрузке не сообщается раньше первого кадра', !methods.includes('LoadingAPI.ready'), methods.join(','));
+  library.LoomfallReady();
+  check('готовность отправляется отдельным вызовом', calls.filter((c) => c.method === 'LoadingAPI.ready').length === 1,
+    calls.map((c) => c.method).join(','));
+  library.LoomfallReady();
+  check('повторная готовность не отправляется второй раз', calls.filter((c) => c.method === 'LoadingAPI.ready').length === 1,
+    calls.map((c) => c.method).join(','));
 
   const read = library.LoomfallStorageGet({ value: 'progress' });
   check('чтение сохранения из профиля', read.value === 'яндекс-ярус-2', JSON.stringify(read.value));
@@ -143,7 +151,7 @@ function loadLibrary(windowMock) {
   };
   const library = loadLibrary(windowMock);
   let crashed = false;
-  try { library.LoomfallInit(); library.LoomfallStorageSet({ value: 'progress' }, { value: 'локально' }); library.LoomfallShowAd(); }
+  try { library.LoomfallInit(); library.LoomfallReady(); library.LoomfallStorageSet({ value: 'progress' }, { value: 'локально' }); library.LoomfallShowAd(); }
   catch (e) { crashed = true; }
   check('не падает без SDK', !crashed);
   check('сохранение в localStorage', windowMock.localStorage.getItem('loomfall.progress') === 'локально');
