@@ -89,6 +89,77 @@ namespace Loomfall.EditorTools
                 new Vector3(0f, 1.7f, 8f),
                 52f);
 
+            // Второй ярус: площадка выше двора за его дальним краем, пандус наверх, свой Светильник и Осколок.
+            {
+            const float upperLevel = 4.4f;
+            const int upX = 6;
+            const int upZ = 8;
+            float upOffset = (upX - 1) * 0.5f * tile;
+            float upStart = startZ + tile * 2f;
+            var upper = new GameObject("ВторойЯрус");
+
+            for (int x = 0; x < upX; x++)
+            {
+                for (int z = 0; z < upZ; z++)
+                {
+                    LoomfallStudio.Place(
+                        upper,
+                        floor,
+                        cave,
+                        new Vector3(x * tile - upOffset, upperLevel, upStart + z * tile),
+                        0f);
+                }
+            }
+
+            for (int z = 0; z < upZ; z++)
+            {
+                LoomfallStudio.Place(upper, wall, cave, new Vector3(-upOffset - tile, upperLevel, upStart + z * tile), 0f);
+                LoomfallStudio.Place(upper, wall, cave, new Vector3(upOffset + tile, upperLevel, upStart + z * tile), 0f);
+            }
+
+            for (int x = 0; x < upX; x++)
+            {
+                LoomfallStudio.Place(upper, wall, cave, new Vector3(x * tile - upOffset, upperLevel, upStart + upZ * tile), 0f);
+            }
+
+            // Пандус: невидимый наклонный пол, по нему Ткач поднимается с нижнего двора.
+            var ramp = new GameObject("ПандусНаверх");
+            ramp.transform.position = new Vector3(0f, upperLevel * 0.5f, startZ + tile);
+            ramp.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
+            var rampCollider = ramp.AddComponent<BoxCollider>();
+            rampCollider.size = new Vector3(tile * 2.5f, 0.4f, 11f);
+
+            // Полы-коллайдеры: луч земли в контроллере Ткача опирается на них.
+            var lowerFloor = new GameObject("ПолДвора");
+            lowerFloor.transform.position = new Vector3(0f, -0.05f, 0f);
+            lowerFloor.AddComponent<BoxCollider>().size = new Vector3(TilesX * tile + 2f, 0.1f, TilesZ * tile + 2f);
+
+            var upperFloor = new GameObject("ПолВерхнегоЯруса");
+            upperFloor.transform.position = new Vector3(0f, upperLevel - 0.05f, upStart + tile * 3.5f);
+            upperFloor.AddComponent<BoxCollider>().size = new Vector3(upX * tile + 2f, 0.1f, upZ * tile + 4f);
+
+            GameObject upperLamp = LoomfallStudio.Place(
+                upper,
+                LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
+                cave,
+                new Vector3(-upOffset, upperLevel + 1.8f, upStart + tile * 6f),
+                0f);
+            if (upperLamp != null)
+            {
+                var upperAnchor = upperLamp.AddComponent<Loomfall.LampAnchor>();
+                upperAnchor.player = weaver.transform;
+            }
+
+            var upperShard = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            upperShard.name = "Осколок-5";
+            upperShard.transform.position = new Vector3(upOffset - tile, level + 1.1f, upStart + tile * 5f);
+            upperShard.transform.localScale = Vector3.one * 0.45f;
+            var upperShardPart = upperShard.AddComponent<Loomfall.MemoryShard>();
+            upperShardPart.player = weaver.transform;
+            upperShardPart.index = 4;
+
+            }
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();

@@ -56,9 +56,17 @@ namespace Loomfall
             verticalSpeed -= gravity * Time.deltaTime;
             Vector3 position = transform.position;
             position.y += verticalSpeed * Time.deltaTime;
-            if (position.y < 0f)
+
+            // Земля ищется лучом вниз: так Ткач сам поднимается по лестнице на верхний ярус.
+            float floorHeight = 0f;
+            if (Physics.Raycast(position + Vector3.up * 1.4f, Vector3.down, out RaycastHit hit, 14f))
             {
-                position.y = 0f;
+                floorHeight = hit.point.y;
+            }
+
+            if (position.y <= floorHeight)
+            {
+                position.y = floorHeight;
                 verticalSpeed = 0f;
             }
 
