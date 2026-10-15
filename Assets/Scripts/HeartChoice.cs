@@ -10,6 +10,9 @@ namespace Loomfall
         public int index;
         public float radius = 2.6f;
 
+        /// <summary>Пробное нажатие для проверок без клавиатуры: в игре не используется.</summary>
+        public bool testPress;
+
         private static readonly string[] ChoiceEndings = { "Сброс", "Разрыв", "Третий узор" };
 
         private void Awake()
@@ -27,16 +30,20 @@ namespace Loomfall
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null || player == null) return;
+            bool press = testPress;
+            testPress = false;
+            if (!press && (keyboard == null || !keyboard.eKey.wasPressedThisFrame)) return;
+
+            if (player == null) return;
             GameSession session = GameSession.Instance;
             if (session == null || !string.IsNullOrEmpty(session.Ending)) return;
             if (Vector3.Distance(player.position, transform.position) > radius) return;
-            if (!keyboard.eKey.wasPressedThisFrame) return;
 
             int safe = Mathf.Clamp(index, 0, ChoiceEndings.Length - 1);
             if (!session.ChooseEnding(ChoiceEndings[safe]))
             {
                 session.Shout("Отказ");
+                Debug.Log("[Loomfall] Сердце Ткани: нить «" + ChoiceEndings[safe] + "» не приняла шаг");
                 return;
             }
 

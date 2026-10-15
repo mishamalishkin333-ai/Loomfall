@@ -14,6 +14,7 @@ namespace Loomfall.EditorTools
         private static Vector3 previousPosition;
         private static float speedSum;
         private static int speedCount;
+        private static HeartChoice thirdThread;
         private static bool started;
 
         public static void Run()
@@ -162,13 +163,81 @@ namespace Loomfall.EditorTools
                     speedCount = 0;
                     Debug.Log("[Loomfall] Подъём: шагаем от двора к пятому ярусу, высоту решает опора на пол");
                 }
-                else if (frames >= 200 && frames < 380)
+                else if (frames >= 200 && frames < 560)
                 {
                     // Только вперёд: высоту подъёма на пандусах решает опора на пол.
                     driver.transform.position += new Vector3(0f, 0f, 0.5f);
                 }
 
                 maxY = Mathf.Max(maxY, driver.transform.position.y);
+
+                // Финал: подходим к третьей нити и пробуем шаг до и после выполнения условий.
+                var currentSession = GameSession.Instance;
+                var currentClock = OblivionClock.Instance;
+
+                if (frames == 560)
+                {
+                    foreach (HeartChoice choice in Object.FindObjectsByType<HeartChoice>(FindObjectsSortMode.None))
+                    {
+                        if (choice.index == 2) thirdThread = choice;
+                    }
+
+                    if (thirdThread != null)
+                    {
+                        driver.transform.position = thirdThread.transform.position - new Vector3(0f, 1.5f, 1.2f);
+                        thirdThread.player = driver.transform;
+                        Debug.Log("[Loomfall] Финал: подошли к третьей нити, условия до шага — осколков "
+                            + (currentSession != null ? currentSession.Shards : -1)
+                            + ", светильников " + (currentClock != null ? currentClock.LitLamps : -1)
+                            + ", Забвение " + (currentClock != null ? currentClock.Oblivion.ToString("F2") : "?"));
+                    }
+                    else
+                    {
+                        Debug.Log("[Loomfall] Финал: третья нить не найдена");
+                    }
+                }
+
+                if (frames == 565 && thirdThread != null)
+                {
+                    thirdThread.testPress = true;
+                }
+
+                if (frames == 570)
+                {
+                    Debug.Log("[Loomfall] Финал: после шага без условий концовка «"
+                        + (currentSession != null && currentSession.Ending.Length > 0 ? currentSession.Ending : "нет")
+                        + "», последняя строка кодекса: "
+                        + (currentSession != null && currentSession.CodexLog.Length > 0 ? currentSession.CodexLog : "пусто"));
+                }
+
+                if (frames == 575)
+                {
+                    if (currentSession != null)
+                    {
+                        for (int i = 0; i < 4; i++) currentSession.CollectShard("Проверка финала " + (i + 1));
+                    }
+
+                    if (currentClock != null)
+                    {
+                        for (int i = 0; i < 2; i++) currentClock.Ignite();
+                    }
+
+                    Debug.Log("[Loomfall] Финал: условия выполнены — осколков "
+                        + (currentSession != null ? currentSession.Shards : -1)
+                        + ", светильников " + (currentClock != null ? currentClock.LitLamps : -1)
+                        + ", Забвение " + (currentClock != null ? currentClock.Oblivion.ToString("F2") : "?"));
+                }
+
+                if (frames == 580 && thirdThread != null)
+                {
+                    thirdThread.testPress = true;
+                }
+
+                if (frames == 585)
+                {
+                    Debug.Log("[Loomfall] Финал: после выполнения условий концовка «"
+                        + (currentSession != null && currentSession.Ending.Length > 0 ? currentSession.Ending : "нет") + "»");
+                }
 
                 if (frames == 200)
                 {
@@ -204,7 +273,7 @@ namespace Loomfall.EditorTools
                 }
             }
 
-            if (frames < 400) return;
+            if (frames < 600) return;
 
             var player = Loomfall.WeaverController.Instance;
             var session = GameSession.Instance;
@@ -220,7 +289,8 @@ namespace Loomfall.EditorTools
                 + (maxY >= 17f ? " — вершина достигнута" : " — до вершины не дошёл"));
             Debug.Log("[Loomfall] Прогон: ход игры — " + (session != null)
                 + ", часов Забвения " + (clock != null ? clock.Oblivion.ToString("F3") : "нет")
-                + ", осколков в мире " + shards + ", светильников " + lamps + ", нитей " + threads);
+                + ", осколков в мире " + shards + ", светильников " + lamps + ", нитей " + threads
+                + ", концовка «" + (session != null && session.Ending.Length > 0 ? session.Ending : "не выбрана") + "»");
             Debug.Log("[Loomfall] Прогон: завершён без остановки игры");
 
             EditorApplication.Exit(0);
