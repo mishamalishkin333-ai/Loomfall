@@ -136,7 +136,7 @@ namespace Loomfall.EditorTools
 
             // Пандус: невидимый наклонный пол, по нему Ткач поднимается с нижнего двора.
             var ramp = new GameObject("ПандусНаверх");
-            ramp.transform.position = new Vector3(0f, upperLevel * 0.5f, startZ + tile);
+            ramp.transform.position = new Vector3(0f, upperLevel * 0.5f, startZ + tile - tile * 1.25f);
             ramp.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
             var rampCollider = ramp.AddComponent<BoxCollider>();
             rampCollider.size = new Vector3(tile * 2.5f, 0.4f, 11f);
@@ -228,7 +228,7 @@ namespace Loomfall.EditorTools
             }
 
             var ramp3 = new GameObject("ПандусНаТретийЯрус");
-            ramp3.transform.position = new Vector3(0f, (upperLevel + level3) * 0.5f, upStart + upZ * tile + tile);
+            ramp3.transform.position = new Vector3(0f, (upperLevel + level3) * 0.5f, upStart + upZ * tile + tile - tile * 1.25f);
             ramp3.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
             ramp3.AddComponent<BoxCollider>().size = new Vector3(tile * 2.5f, 0.4f, 11f);
 
@@ -297,7 +297,7 @@ namespace Loomfall.EditorTools
             }
 
             var ramp4 = new GameObject("ПандусНаЧетвёртыйЯрус");
-            ramp4.transform.position = new Vector3(0f, (level3 + level4) * 0.5f, up3Start + tile * 6f + tile);
+            ramp4.transform.position = new Vector3(0f, (level3 + level4) * 0.5f, up3Start + tile * 6f + tile - tile * 1.25f);
             ramp4.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
             ramp4.AddComponent<BoxCollider>().size = new Vector3(tile * 2.5f, 0.4f, 11f);
 
@@ -358,7 +358,7 @@ namespace Loomfall.EditorTools
             }
 
             var ramp5 = new GameObject("ПандусНаПятыйЯрус");
-            ramp5.transform.position = new Vector3(0f, (level4 + level5) * 0.5f, up4Start + tile * 5f + tile);
+            ramp5.transform.position = new Vector3(0f, (level4 + level5) * 0.5f, up4Start + tile * 5f + tile - tile * 1.25f);
             ramp5.transform.rotation = Quaternion.Euler(-26f, 0f, 0f);
             ramp5.AddComponent<BoxCollider>().size = new Vector3(tile * 2.5f, 0.4f, 11f);
 
@@ -370,7 +370,7 @@ namespace Loomfall.EditorTools
                 upper5,
                 LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
                 cave,
-                new Vector3(0f, level5 + 1.8f, up5Start + tile * 2.5f),
+                new Vector3(tile * 1.5f, level5 + 1.8f, up5Start + tile * 2.5f),
                 0f);
             if (lamp5 != null)
             {
@@ -380,7 +380,7 @@ namespace Loomfall.EditorTools
 
             var shard5 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             shard5.name = "Осколок-8";
-            shard5.transform.position = new Vector3(0f, level5 + 1.1f, up5Start + tile * 1.5f);
+            shard5.transform.position = new Vector3(-tile * 1.5f, level5 + 1.1f, up5Start + tile * 1.5f);
             shard5.transform.localScale = Vector3.one * 0.45f;
             var shard5Part = shard5.AddComponent<Loomfall.MemoryShard>();
             shard5Part.player = weaver.transform;

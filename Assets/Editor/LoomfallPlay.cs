@@ -131,6 +131,32 @@ namespace Loomfall.EditorTools
 
                 maxY = Mathf.Max(maxY, driver.transform.position.y);
 
+                if (frames == 200)
+                {
+                    float previous = -1f;
+                    int ledges = 0;
+                    for (float z = -10f; z <= 180f; z += 1f)
+                    {
+                        float height = 0f;
+                        if (Physics.Raycast(new Vector3(0f, 40f, z), Vector3.down, out RaycastHit probe, 80f))
+                        {
+                            height = probe.point.y;
+                        }
+
+                        if (previous >= 0f && Mathf.Abs(height - previous) > 0.6f)
+                        {
+                            ledges++;
+                            Debug.Log("[Loomfall] Ступень: z " + z.ToString("F0")
+                                + ", высота " + previous.ToString("F2") + " -> " + height.ToString("F2")
+                                + " (перепад " + (height - previous).ToString("F2") + ")");
+                        }
+
+                        previous = height;
+                    }
+
+                    Debug.Log("[Loomfall] Свип высоты: z от -10 до 180 пройден, перепадов " + ledges);
+                }
+
                 if (frames >= 40 && frames % 40 == 0)
                 {
                     Debug.Log("[Loomfall] Подъём: кадр " + frames
