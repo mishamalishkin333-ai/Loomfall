@@ -23,6 +23,7 @@ namespace Loomfall
             Tier = ReadInt("tier", 1);
             Threads = ReadInt("threads", 0);
             Shards = ReadInt("shards", 0);
+            Ending = PlatformBridge.Load("ending", string.Empty);
             Debug.Log("[Loomfall] Ярус " + Tier + ", нитей натянуто " + Threads);
         }
 
@@ -40,11 +41,23 @@ namespace Loomfall
             if (Vector3.Distance(player.position, loom.position) > loomRadius) return;
 
             Threads++;
-            if (Threads >= threadsPerTier)
+            if (Threads >= RequiredThreads(Tier))
             {
                 Threads = 0;
-                Tier++;
-                Debug.Log("[Loomfall] Ярус пройден: нить ведёт выше");
+                if (Tier < MaxTier)
+                {
+                    Tier++;
+                    Debug.Log("[Loomfall] Ярус пройден: нить ведёт выше, открыт ярус " + Tier);
+                }
+                else
+                {
+                    Ending = DecideEnding(
+                        OblivionClock.Instance != null ? OblivionClock.Instance.Oblivion : 0f,
+                        Shards,
+                        OblivionClock.Instance != null ? OblivionClock.Instance.LitLamps : 0);
+                    PlatformBridge.Save("ending", Ending);
+                    Debug.Log("[Loomfall] Ярусов больше нет. Концовка: " + Ending);
+                }
             }
 
             PlatformBridge.Save("tier", Tier.ToString());
@@ -73,6 +86,24 @@ namespace Loomfall
                 ? "Слово сказано вслух. Кто-то чужой забыл эту секунду."
                 : "Разрыв прошёл по камню. Память яруса стала тоньше.";
             CodexTime = Time.time;
+        }
+
+        public const int MaxTier = 5;
+
+        public string Ending { get; private set; } = string.Empty;
+
+        /// <summary>У каждого яруса своё условие: чем выше, тем больше нитей нужно натянуть.</summary>
+        public static int RequiredThreads(int tier)
+        {
+            return Mathf.Clamp(tier, 1, MaxTier) + 2;
+        }
+
+        /// <summary>Три концовки по библии: Слово, Разрыв и тихое Забвение.</summary>
+        public static string DecideEnding(float oblivion, int shards, int lamps)
+        {
+            if (shards >= 4 && lamps >= 2 && oblivion < 0.4f) return "Слово";
+            if (oblivion >= 0.6f) return "Разрыв";
+            return "Забвение";
         }
 
         private static int ReadInt(string key, int fallback)

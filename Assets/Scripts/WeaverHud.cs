@@ -62,6 +62,14 @@ namespace Loomfall
                     "Запись Кодекса (" + session.Shards + "): " + session.Codex,
                     accent);
             }
+
+            if (session != null && !string.IsNullOrEmpty(session.Ending))
+            {
+                GUI.Label(
+                    new Rect(28f, 222f, 1300f, 34f),
+                    "Концовка: «" + session.Ending + "» — двор пройден",
+                    accent);
+            }
             GUI.Label(new Rect(28f, Screen.height - 62f, 1100f, 26f), "WASD — идти, Shift — бежать, пробел — прыжок, E — ткать, R — реклама за награду", line);
 
             if (player == null || loom == null) return;
