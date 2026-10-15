@@ -139,7 +139,7 @@ namespace Loomfall.EditorTools
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             RenderSettings.fogColor = new Color(0.075f, 0.085f, 0.115f);
-            RenderSettings.fogDensity = 0.02f;
+            RenderSettings.fogDensity = 0.014f;
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.13f, 0.15f, 0.19f);
             RenderSettings.ambientEquatorColor = new Color(0.07f, 0.075f, 0.09f);
@@ -184,8 +184,9 @@ namespace Loomfall.EditorTools
             var grade = profile.Add<ColorAdjustments>(true);
             grade.postExposure.Override(0.45f);
             grade.contrast.Override(14f);
-            grade.saturation.Override(-12f);
+            grade.saturation.Override(6f);
             grade.colorFilter.Override(new Color(1f, 0.96f, 0.9f));
+            grade.hueShift.Override(4f);
 
             var vignette = profile.Add<Vignette>(true);
             vignette.intensity.Override(0.38f);
@@ -346,6 +347,15 @@ namespace Loomfall.EditorTools
         /// <summary>Материал URP с текстурой; нужен для моделей кита и персонажа.</summary>
         public static Material MakeTextureMaterial(string name, string texturePath)
         {
+            return MakeTextureMaterial(name, texturePath, Color.white, 0.3f, 0f);
+        }
+
+        /// <summary>
+        /// Материал с собственным оттенком: весь двор на одном сером камне
+        /// выглядел монохромной пятном, а роль объекта должна читаться по цвету.
+        /// </summary>
+        public static Material MakeTextureMaterial(string name, string texturePath, Color tint, float smoothness, float metallic)
+        {
             EnsureFolder(MaterialsFolder);
             string path = $"{MaterialsFolder}/{name}.mat";
 
@@ -372,9 +382,45 @@ namespace Loomfall.EditorTools
 
             material.shader = Shader.Find("Universal Render Pipeline/Lit");
             material.SetTexture("_BaseMap", texture);
-            material.SetColor("_BaseColor", Color.white);
-            material.SetFloat("_Smoothness", 0.3f);
-            material.SetFloat("_Metallic", 0f);
+            material.SetColor("_BaseColor", tint);
+            material.SetFloat("_Smoothness", smoothness);
+            material.SetFloat("_Metallic", metallic);
+            EditorUtility.SetDirty(material);
+            AssetDatabase.SaveAssets();
+            return material;
+        }
+
+        /// <summary>
+        /// Сплошной материал URP: для частей фигуры Ткача, где роль читается
+        /// цветом и свечением, а не текстурой. Эмиссия включается только там,
+        /// где ей положено светиться (нить), остальное остаётся диффузным.
+        /// </summary>
+        public static Material MakeSolidMaterial(string name, Color color, float smoothness, float metallic, Color emission, float emissionStrength)
+        {
+            EnsureFolder(MaterialsFolder);
+            string path = $"{MaterialsFolder}/{name}.mat";
+
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                AssetDatabase.CreateAsset(material, path);
+                material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            }
+
+            if (material == null)
+            {
+                Debug.LogError($"[Loomfall] Материал не создан: {path}");
+                return null;
+            }
+
+            material.shader = Shader.Find("Universal Render Pipeline/Lit");
+            material.SetColor("_BaseColor", color);
+            material.SetFloat("_Smoothness", smoothness);
+            material.SetFloat("_Metallic", metallic);
+            material.SetColor("_EmissionColor", emission * emissionStrength);
+            if (emissionStrength > 0f) material.EnableKeyword("_EMISSION");
+            else material.DisableKeyword("_EMISSION");
             EditorUtility.SetDirty(material);
             AssetDatabase.SaveAssets();
             return material;

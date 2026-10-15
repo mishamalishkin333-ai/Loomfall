@@ -21,18 +21,27 @@ namespace Loomfall.EditorTools
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             LoomfallCore.BuildLighting();
 
-            Material cave = LoomfallCore.MakeTextureMaterial("CaveMap", Kit + "/colormap.png");
-            Material skin = LoomfallCore.MakeTextureMaterial("HumanSkin", Hero + "/skaterMaleA.png");
+            Material floorMat = LoomfallCore.MakeTextureMaterial("CaveFloor", Kit + "/colormap.png", new Color(0.86f, 0.8f, 0.7f), 0.42f, 0f);
+            Material wallMat = LoomfallCore.MakeTextureMaterial("CaveWall", Kit + "/colormap.png", new Color(0.62f, 0.66f, 0.78f), 0.2f, 0f);
+            Material propMat = LoomfallCore.MakeTextureMaterial("CaveProp", Kit + "/colormap.png", new Color(0.95f, 0.74f, 0.48f), 0.5f, 0.1f);
+            Material gateMat = LoomfallCore.MakeTextureMaterial("CaveGate", Kit + "/colormap.png", new Color(0.55f, 0.62f, 0.72f), 0.72f, 0.55f);
+            // Ткач: сплошные цвета и одна светящаяся нить. Плоская пластина из
+            // characterMedium.fbx объёмным персонажем не становится, поэтому
+            // фигуру собираем из примитивов с точными размерами.
+            Material robe = LoomfallCore.MakeSolidMaterial("WeaverRobe", new Color(0.17f, 0.2f, 0.33f), 0.28f, 0f, Color.black, 0f);
+            Material hem = LoomfallCore.MakeSolidMaterial("WeaverHem", new Color(0.23f, 0.27f, 0.42f), 0.24f, 0f, Color.black, 0f);
+            Material trim = LoomfallCore.MakeSolidMaterial("WeaverTrim", new Color(0.85f, 0.68f, 0.3f), 0.6f, 0.35f, new Color(0.3f, 0.22f, 0.05f), 0.5f);
+            Material skin = LoomfallCore.MakeSolidMaterial("WeaverSkin", new Color(0.8f, 0.64f, 0.53f), 0.35f, 0f, Color.black, 0f);
+            Material glow = LoomfallCore.MakeSolidMaterial("WeaverThread", new Color(0.75f, 0.95f, 1f), 0.85f, 0f, new Color(0.35f, 0.8f, 1f), 3f);
 
             GameObject floor = LoomfallStudio.LoadModel(Kit + "/template-floor.fbx");
             GameObject wall = LoomfallStudio.LoadModel(Kit + "/template-wall.fbx");
             GameObject corner = LoomfallStudio.LoadModel(Kit + "/template-corner.fbx");
             GameObject stairs = LoomfallStudio.LoadModel(Kit + "/stairs.fbx");
             GameObject gate = LoomfallStudio.LoadModel(Kit + "/gate.fbx");
-            GameObject hero = LoomfallStudio.LoadModel(Hero + "/characterMedium.fbx");
-            if (floor == null || wall == null || hero == null)
+            if (floor == null || wall == null)
             {
-                Debug.LogError("[Loomfall] Нет модулей кита или персонажа");
+                Debug.LogError("[Loomfall] Нет модулей кита");
                 EditorApplication.Exit(1);
                 return;
             }
@@ -47,7 +56,7 @@ namespace Loomfall.EditorTools
             {
                 for (int z = 0; z < TilesZ; z++)
                 {
-                    LoomfallStudio.Place(root, floor, cave, new Vector3(x * tile - startX, 0f, z * tile - startZ), 0f);
+                    LoomfallStudio.Place(root, floor, floorMat, new Vector3(x * tile - startX, 0f, z * tile - startZ), 0f);
                 }
             }
 
@@ -55,8 +64,8 @@ namespace Loomfall.EditorTools
             {
                 for (int s = 0; s < Stack; s++)
                 {
-                    LoomfallStudio.Place(root, wall, cave, new Vector3(-startX - tile, s * level, z * tile - startZ), 90f);
-                    LoomfallStudio.Place(root, wall, cave, new Vector3(startX + tile, s * level, z * tile - startZ), 270f);
+                    LoomfallStudio.Place(root, wall, wallMat, new Vector3(-startX - tile, s * level, z * tile - startZ), 90f);
+                    LoomfallStudio.Place(root, wall, wallMat, new Vector3(startX + tile, s * level, z * tile - startZ), 270f);
                 }
             }
 
@@ -64,36 +73,27 @@ namespace Loomfall.EditorTools
             {
                 for (int s = 0; s < Stack; s++)
                 {
-                    LoomfallStudio.Place(root, wall, cave, new Vector3(x * tile - startX, s * level, startZ + tile), 0f);
+                    LoomfallStudio.Place(root, wall, wallMat, new Vector3(x * tile - startX, s * level, startZ + tile), 0f);
                 }
             }
 
             if (corner != null)
             {
-                LoomfallStudio.Place(root, corner, cave, new Vector3(-startX - tile, 0f, startZ + tile), 0f);
-                LoomfallStudio.Place(root, corner, cave, new Vector3(startX + tile, 0f, startZ + tile), 270f);
+                LoomfallStudio.Place(root, corner, wallMat, new Vector3(-startX - tile, 0f, startZ + tile), 0f);
+                LoomfallStudio.Place(root, corner, wallMat, new Vector3(startX + tile, 0f, startZ + tile), 270f);
             }
 
-            if (stairs != null) LoomfallStudio.Place(root, stairs, cave, new Vector3(-2.6f, 0f, 6f), 0f);
-            if (gate != null) LoomfallStudio.Place(root, gate, cave, new Vector3(0f, 0f, -startZ - tile), 0f);
+            if (stairs != null) LoomfallStudio.Place(root, stairs, propMat, new Vector3(-2.6f, 0f, 6f), 0f);
+            if (gate != null) LoomfallStudio.Place(root, gate, gateMat, new Vector3(0f, 0f, -startZ - tile), 0f);
+            TierLight(root.transform, new Vector3(0f, 5.5f, 0f), 12f);
 
-            GameObject model = LoomfallStudio.Place(root, hero, skin, new Vector3(0f, 0f, -4.4f), 180f);
-            model.transform.localScale = Vector3.one * (1.75f / Mathf.Max(0.05f, LoomfallStudio.MaxSize(hero)));
-
-            // Узел героя: двигает его контроллер, а анимация живёт внутри узла и позицию не возвращает.
+            // Узел героя: двигает его контроллер, а фигура живёт внутри узла и
+            // позицию не возвращает — как делала анимация из клипов.
             var weaver = new GameObject("ТкачУзел");
             weaver.transform.SetParent(root.transform, false);
             weaver.transform.localPosition = new Vector3(0f, 0.05f, -4.4f);
             weaver.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            model.transform.SetParent(weaver.transform, true);
-            model.transform.localPosition = Vector3.zero;
-            model.transform.localRotation = Quaternion.identity;
-
-            Animator animator = model.GetComponent<Animator>();
-            if (animator == null) animator = model.AddComponent<Animator>();
-            animator.runtimeAnimatorController = LoomfallHeroAnim.EnsureController();
-            // Root motion выключен: иначе анимация сама тянет героя в позицию клипа и перебивает постройку.
-            animator.applyRootMotion = false;
+            LoomfallWeaverFigure.Build(weaver, robe, hem, trim, skin, glow);
 
             Camera camera = LoomfallStudio.MakeCamera(
                 "КамераИгрока",
@@ -109,6 +109,7 @@ namespace Loomfall.EditorTools
             float upOffset = (upX - 1) * 0.5f * tile;
             float upStart = startZ + tile * 2f;
             var upper = new GameObject("ВторойЯрус");
+            TierLight(upper.transform, new Vector3(0f, upperLevel + 5.5f, upStart + tile * 3.5f), 16f);
 
             for (int x = 0; x < upX; x++)
             {
@@ -117,7 +118,7 @@ namespace Loomfall.EditorTools
                     LoomfallStudio.Place(
                         upper,
                         floor,
-                        cave,
+                        floorMat,
                         new Vector3(x * tile - upOffset, upperLevel, upStart + z * tile),
                         0f);
                 }
@@ -125,13 +126,13 @@ namespace Loomfall.EditorTools
 
             for (int z = 0; z < upZ; z++)
             {
-                LoomfallStudio.Place(upper, wall, cave, new Vector3(-upOffset - tile, upperLevel, upStart + z * tile), 0f);
-                LoomfallStudio.Place(upper, wall, cave, new Vector3(upOffset + tile, upperLevel, upStart + z * tile), 0f);
+                LoomfallStudio.Place(upper, wall, wallMat, new Vector3(-upOffset - tile, upperLevel, upStart + z * tile), 0f);
+                LoomfallStudio.Place(upper, wall, wallMat, new Vector3(upOffset + tile, upperLevel, upStart + z * tile), 0f);
             }
 
             for (int x = 0; x < upX; x++)
             {
-                LoomfallStudio.Place(upper, wall, cave, new Vector3(x * tile - upOffset, upperLevel, upStart + upZ * tile), 0f);
+                LoomfallStudio.Place(upper, wall, wallMat, new Vector3(x * tile - upOffset, upperLevel, upStart + upZ * tile), 0f);
             }
 
             // Пандус: невидимый наклонный пол, по нему Ткач поднимается с нижнего двора.
@@ -153,7 +154,7 @@ namespace Loomfall.EditorTools
             GameObject upperLamp = LoomfallStudio.Place(
                 upper,
                 LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
-                cave,
+                propMat,
                 new Vector3(-upOffset, upperLevel + 1.8f, upStart + tile * 6f),
                 0f);
             if (upperLamp != null)
@@ -212,19 +213,20 @@ namespace Loomfall.EditorTools
             const float level3 = 8.8f;
             float up3Start = upStart + upZ * tile + tile * 2f;
             var upper3 = new GameObject("ТретийЯрус");
+            TierLight(upper3.transform, new Vector3(0f, level3 + 5.5f, up3Start + tile * 2.5f), 20f);
 
             for (int x = 0; x < 5; x++)
             {
                 for (int z = 0; z < 6; z++)
                 {
-                    LoomfallStudio.Place(upper3, floor, cave, new Vector3(x * tile - tile * 2f, level3, up3Start + z * tile), 0f);
+                    LoomfallStudio.Place(upper3, floor, floorMat, new Vector3(x * tile - tile * 2f, level3, up3Start + z * tile), 0f);
                 }
             }
 
             for (int z = 0; z < 6; z++)
             {
-                LoomfallStudio.Place(upper3, wall, cave, new Vector3(-tile * 3f, level3, up3Start + z * tile), 0f);
-                LoomfallStudio.Place(upper3, wall, cave, new Vector3(tile * 3f, level3, up3Start + z * tile), 0f);
+                LoomfallStudio.Place(upper3, wall, wallMat, new Vector3(-tile * 3f, level3, up3Start + z * tile), 0f);
+                LoomfallStudio.Place(upper3, wall, wallMat, new Vector3(tile * 3f, level3, up3Start + z * tile), 0f);
             }
 
             var ramp3 = new GameObject("ПандусНаТретийЯрус");
@@ -247,7 +249,7 @@ namespace Loomfall.EditorTools
             GameObject lamp3 = LoomfallStudio.Place(
                 upper3,
                 LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
-                cave,
+                propMat,
                 new Vector3(tile, level3 + 1.8f, up3Start + tile * 4f),
                 0f);
             if (lamp3 != null)
@@ -281,19 +283,20 @@ namespace Loomfall.EditorTools
             const float level4 = 13.2f;
             float up4Start = up3Start + tile * 8f;
             var upper4 = new GameObject("ЧетвёртыйЯрус");
+            TierLight(upper4.transform, new Vector3(0f, level4 + 5.5f, up4Start + tile * 2f), 24f);
 
             for (int x = 0; x < 4; x++)
             {
                 for (int z = 0; z < 5; z++)
                 {
-                    LoomfallStudio.Place(upper4, floor, cave, new Vector3(x * tile - tile * 1.5f, level4, up4Start + z * tile), 0f);
+                    LoomfallStudio.Place(upper4, floor, floorMat, new Vector3(x * tile - tile * 1.5f, level4, up4Start + z * tile), 0f);
                 }
             }
 
             for (int z = 0; z < 5; z++)
             {
-                LoomfallStudio.Place(upper4, wall, cave, new Vector3(-tile * 2.5f, level4, up4Start + z * tile), 0f);
-                LoomfallStudio.Place(upper4, wall, cave, new Vector3(tile * 2.5f, level4, up4Start + z * tile), 0f);
+                LoomfallStudio.Place(upper4, wall, wallMat, new Vector3(-tile * 2.5f, level4, up4Start + z * tile), 0f);
+                LoomfallStudio.Place(upper4, wall, wallMat, new Vector3(tile * 2.5f, level4, up4Start + z * tile), 0f);
             }
 
             var ramp4 = new GameObject("ПандусНаЧетвёртыйЯрус");
@@ -308,7 +311,7 @@ namespace Loomfall.EditorTools
             GameObject lamp4 = LoomfallStudio.Place(
                 upper4,
                 LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
-                cave,
+                propMat,
                 new Vector3(tile * 0.5f, level4 + 1.8f, up4Start + tile * 3.5f),
                 0f);
             if (lamp4 != null)
@@ -342,19 +345,20 @@ namespace Loomfall.EditorTools
             const float level5 = 17.6f;
             float up5Start = up4Start + tile * 7f;
             var upper5 = new GameObject("ПятыйЯрус");
+            TierLight(upper5.transform, new Vector3(0f, level5 + 5.5f, up5Start + tile * 1.5f), 30f);
 
             for (int x = 0; x < 3; x++)
             {
                 for (int z = 0; z < 4; z++)
                 {
-                    LoomfallStudio.Place(upper5, floor, cave, new Vector3(x * tile - tile, level5, up5Start + z * tile), 0f);
+                    LoomfallStudio.Place(upper5, floor, floorMat, new Vector3(x * tile - tile, level5, up5Start + z * tile), 0f);
                 }
             }
 
             for (int z = 0; z < 4; z++)
             {
-                LoomfallStudio.Place(upper5, wall, cave, new Vector3(-tile * 2f, level5, up5Start + z * tile), 0f);
-                LoomfallStudio.Place(upper5, wall, cave, new Vector3(tile * 2f, level5, up5Start + z * tile), 0f);
+                LoomfallStudio.Place(upper5, wall, wallMat, new Vector3(-tile * 2f, level5, up5Start + z * tile), 0f);
+                LoomfallStudio.Place(upper5, wall, wallMat, new Vector3(tile * 2f, level5, up5Start + z * tile), 0f);
             }
 
             var ramp5 = new GameObject("ПандусНаПятыйЯрус");
@@ -369,7 +373,7 @@ namespace Loomfall.EditorTools
             GameObject lamp5 = LoomfallStudio.Place(
                 upper5,
                 LoomfallStudio.LoadModel("Assets/Art/Models/CaveKit/template-wall-detail-a.fbx"),
-                cave,
+                propMat,
                 new Vector3(tile * 1.5f, level5 + 1.8f, up5Start + tile * 2.5f),
                 0f);
             if (lamp5 != null)
@@ -418,6 +422,27 @@ namespace Loomfall.EditorTools
 
             var stats = LoomfallCore.RenderShot(camera, "C:/Unity/shots/yard-models.png", 1600, 900);
             Debug.Log("[Loomfall] Двор из моделей: " + stats);
+        }
+
+        /// <summary>
+        /// Тёплое заполняющее сияние яруса. В URP точечный свет измеряется
+        /// канделами и затухает как 1/d²: значения в единицы на высоте 2,6 м
+        /// давали на полу 0,2, и верхние ярусы оставались на 67% чёрными.
+        /// Источник вешаем высоко и ставим в десятки кандел — как у рабочих
+        /// источников проекта.
+        /// </summary>
+        private static void TierLight(Transform parent, Vector3 position, float intensity)
+        {
+            var node = new GameObject("СияниеЯруса");
+            node.transform.SetParent(parent, false);
+            node.transform.localPosition = position;
+
+            var light = node.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.8f, 0.58f);
+            light.range = 30f;
+            light.intensity = intensity;
+            light.shadows = LightShadows.None;
         }
     }
 }

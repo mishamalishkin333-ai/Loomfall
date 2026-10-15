@@ -6,9 +6,9 @@ namespace Loomfall
     public class WeaverCamera : MonoBehaviour
     {
         public Transform target;
-        public float distance = 6.5f;
-        public float height = 2.9f;
-        public float lookHeight = 1.5f;
+        public float distance = 5.1f;
+        public float height = 2.35f;
+        public float lookHeight = 1.25f;
         public float followSpeed = 6f;
 
         private void LateUpdate()

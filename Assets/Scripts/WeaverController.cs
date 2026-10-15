@@ -28,6 +28,17 @@ namespace Loomfall
         private Animator animator;
         private float verticalSpeed;
 
+        /// <summary>Доля полной скорости 0..1: по ней фигура выбирает покой, шаг или бег.</summary>
+        public float Speed01 { get; private set; }
+
+        /// <summary>Ткач в воздухе — прыжок или падение; фигура в этот момент поджимает ноги.</summary>
+        public bool Airborne => Mathf.Abs(verticalSpeed) > 0.05f;
+
+        // Только измерение для разборов: объёмная фигура знает свои размеры,
+        // подгонять в ней нечего — в отличие от пластины из FBX, которая то
+        // вырастала до 46 метров, то сжималась до сантиметров.
+        private Renderer[] body;
+
         private void Awake()
         {
             Instance = this;
@@ -36,6 +47,32 @@ namespace Loomfall
             if (animator == null) animator = GetComponentInChildren<Animator>();
             // Анимация не должна двигать Ткача: позицию держит только этот контроллер.
             if (animator != null) animator.applyRootMotion = false;
+            body = GetComponentsInChildren<Renderer>(true);
+            Debug.Log("[Loomfall] Ткач: узел «" + name + "», рендереров " + body.Length);
+        }
+
+        /// <summary>Фактический рост героя по мировым габаритам его частей. Только измерение.</summary>
+        public float CurrentHeight
+        {
+            get
+            {
+                if (body == null || body.Length == 0) return 0f;
+                Bounds bounds = body[0].bounds;
+                for (int i = 1; i < body.Length; i++) bounds.Encapsulate(body[i].bounds);
+                return bounds.size.y;
+            }
+        }
+
+        /// <summary>Насколько ступни выше или ниже точки, где стоит узел героя.</summary>
+        public float FeetOffset
+        {
+            get
+            {
+                if (body == null || body.Length == 0) return 0f;
+                Bounds bounds = body[0].bounds;
+                for (int i = 1; i < body.Length; i++) bounds.Encapsulate(body[i].bounds);
+                return bounds.min.y - transform.position.y;
+            }
         }
 
         private void Start()
@@ -85,6 +122,9 @@ namespace Loomfall
 
             if (move.sqrMagnitude > 1f) move.Normalize();
             float speed = move.magnitude * (sprint ? runSpeed : walkSpeed);
+
+            // Фигура анимируется по доле полной скорости, а не по метрам в секунду.
+            Speed01 = Mathf.Clamp01(speed / Mathf.Max(0.01f, runSpeed));
 
             if (move.sqrMagnitude > 0.001f)
             {

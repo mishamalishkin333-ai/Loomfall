@@ -74,9 +74,17 @@ namespace Loomfall.EditorTools
 
             var loom = new GameObject("ТкацкийУзел");
             loom.transform.position = new Vector3(0f, 0f, 7f);
-            Material cave = LoomfallCore.MakeTextureMaterial("CaveMap", Kit + "/colormap.png");
+            // Станок и светильники — цели игрока, и они не должны сливаться со
+            // стеной: серый камень кита делал кадр у узла на 89% бесцветным.
+            Material brass = LoomfallCore.MakeTextureMaterial("LoomBrass", Kit + "/colormap.png", new Color(1f, 0.72f, 0.32f), 0.78f, 0.62f);
             GameObject detail = LoomfallStudio.LoadModel(Kit + "/template-detail.fbx");
-            if (detail != null) LoomfallStudio.Place(loom, detail, cave, loom.transform.position, 0f);
+            if (detail != null) LoomfallStudio.Place(loom, detail, brass, loom.transform.position, 0f);
+            var loomGlow = loom.AddComponent<Light>();
+            loomGlow.type = LightType.Point;
+            loomGlow.color = new Color(1f, 0.72f, 0.36f);
+            loomGlow.range = 12f;
+            loomGlow.intensity = 14f;
+            loomGlow.shadows = LightShadows.None;
 
             var hudObject = new GameObject("Интерфейс");
             var hud = hudObject.AddComponent<Loomfall.WeaverHud>();
@@ -128,7 +136,7 @@ namespace Loomfall.EditorTools
             {
                 var lamp = new GameObject("Светильник-" + (i + 1));
                 lamp.transform.position = lampPlaces[i];
-                if (lampModel != null) LoomfallStudio.Place(lamp, lampModel, cave, lampPlaces[i], 0f);
+                if (lampModel != null) LoomfallStudio.Place(lamp, lampModel, brass, lampPlaces[i], 0f);
                 var anchor = lamp.AddComponent<Loomfall.LampAnchor>();
                 anchor.player = weaver.transform;
             }
