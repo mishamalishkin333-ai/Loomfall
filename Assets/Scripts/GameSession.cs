@@ -85,12 +85,28 @@ namespace Loomfall
             Debug.Log("[Loomfall] Записей в Кодексе: " + Shards);
         }
 
+        /// <summary>Шаг к нити в Сердце Ткани. «Третий узор» держится, только если собрано и зажжено.</summary>
+        public bool ChooseEnding(string ending)
+        {
+            if (ending == "Третий узор")
+            {
+                int lamps = OblivionClock.Instance != null ? OblivionClock.Instance.LitLamps : 0;
+                float oblivion = OblivionClock.Instance != null ? OblivionClock.Instance.Oblivion : 1f;
+                if (Shards < 4 || lamps < 2 || oblivion >= 0.4f) return false;
+            }
+
+            Ending = ending;
+            PlatformBridge.Save("ending", Ending);
+            Debug.Log("[Loomfall] Концовка выбрана шагом: " + Ending);
+            return true;
+        }
+
         /// <summary>Реплика мира на действие Ткача: каждая трата Эха стирает чью-то секунду.</summary>
         public void Shout(string word)
         {
-            Codex = word == "Слово"
-                ? "Слово сказано вслух. Кто-то чужой забыл эту секунду."
-                : "Разрыв прошёл по камню. Память яруса стала тоньше.";
+            if (word == "Отказ") Codex = "Третий узел не держится: в нём нет ни собранного, ни зажжённого.";
+            else if (word == "Слово") Codex = "Слово сказано вслух. Кто-то чужой забыл эту секунду.";
+            else Codex = "Разрыв прошёл по камню. Память яруса стала тоньше.";
             CodexTime = Time.time;
         }
 

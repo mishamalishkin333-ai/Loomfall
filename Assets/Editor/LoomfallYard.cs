@@ -374,6 +374,18 @@ namespace Loomfall.EditorTools
             shard5Part.player = weaver.transform;
             shard5Part.index = 7;
 
+            // Сердце Ткани: три нити на вершине. Шаг к одной и нажатие «E» решают концовку.
+            for (int i = 0; i < 3; i++)
+            {
+                var thread = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                thread.name = "НитьСердца-" + (i + 1);
+                thread.transform.position = new Vector3((i - 1) * tile * 0.9f, level5 + 1.5f, up5Start + tile * 0.5f);
+                thread.transform.localScale = new Vector3(0.16f, 1.5f, 0.16f);
+                var choice = thread.AddComponent<Loomfall.HeartChoice>();
+                choice.player = weaver.transform;
+                choice.index = i;
+            }
+
             float[] probes5 = { up4Start + tile * 5f + tile * 0.5f, up5Start + tile * 1.5f };
             foreach (float probe in probes5)
             {
