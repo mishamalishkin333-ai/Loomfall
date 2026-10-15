@@ -77,11 +77,20 @@ namespace Loomfall.EditorTools
             if (stairs != null) LoomfallStudio.Place(root, stairs, cave, new Vector3(-2.6f, 0f, 6f), 0f);
             if (gate != null) LoomfallStudio.Place(root, gate, cave, new Vector3(0f, 0f, -startZ - tile), 0f);
 
-            GameObject weaver = LoomfallStudio.Place(root, hero, skin, new Vector3(0f, 0f, -4.4f), 180f);
-            weaver.transform.localScale = Vector3.one * (1.75f / Mathf.Max(0.05f, LoomfallStudio.MaxSize(hero)));
+            GameObject model = LoomfallStudio.Place(root, hero, skin, new Vector3(0f, 0f, -4.4f), 180f);
+            model.transform.localScale = Vector3.one * (1.75f / Mathf.Max(0.05f, LoomfallStudio.MaxSize(hero)));
+
+            // Узел героя: двигает его контроллер, а анимация живёт внутри узла и позицию не возвращает.
+            var weaver = new GameObject("ТкачУзел");
+            weaver.transform.SetParent(root.transform, false);
             weaver.transform.localPosition = new Vector3(0f, 0.05f, -4.4f);
-            Animator animator = weaver.GetComponent<Animator>();
-            if (animator == null) animator = weaver.AddComponent<Animator>();
+            weaver.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            model.transform.SetParent(weaver.transform, true);
+            model.transform.localPosition = Vector3.zero;
+            model.transform.localRotation = Quaternion.identity;
+
+            Animator animator = model.GetComponent<Animator>();
+            if (animator == null) animator = model.AddComponent<Animator>();
             animator.runtimeAnimatorController = LoomfallHeroAnim.EnsureController();
             // Root motion выключен: иначе анимация сама тянет героя в позицию клипа и перебивает постройку.
             animator.applyRootMotion = false;

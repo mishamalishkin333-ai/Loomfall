@@ -4,7 +4,6 @@ using UnityEngine.InputSystem;
 namespace Loomfall
 {
     /// <summary>Управление Ткачом: WASD, бег на Shift, прыжок на пробел, анимация по скорости.</summary>
-    [RequireComponent(typeof(Animator))]
     public class WeaverController : MonoBehaviour
     {
         public float walkSpeed = 3.2f;
@@ -13,12 +12,22 @@ namespace Loomfall
         public float turnSpeed = 12f;
         public float gravity = 9.81f;
 
+        /// <summary>Пробный ввод для проверок без клавиатуры: в игре не используется.</summary>
+        public Vector2 testMove;
+        public bool testJump;
+
+        /// <summary>Сам Ткач: доступ без поиска объектов по сцене.</summary>
+        public static WeaverController Instance { get; private set; }
+
         private Animator animator;
         private float verticalSpeed;
 
         private void Awake()
         {
+            Instance = this;
             animator = GetComponent<Animator>();
+            // Аниматор живёт на модели внутри узла, поэтому ищем и в детях.
+            if (animator == null) animator = GetComponentInChildren<Animator>();
             // Анимация не должна двигать Ткача: позицию держит только этот контроллер.
             if (animator != null) animator.applyRootMotion = false;
         }
@@ -38,16 +47,24 @@ namespace Loomfall
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null) return;
 
-            Vector2 move = Vector2.zero;
-            if (keyboard.aKey.isPressed) move.x -= 1f;
-            if (keyboard.dKey.isPressed) move.x += 1f;
-            if (keyboard.sKey.isPressed) move.y -= 1f;
-            if (keyboard.wKey.isPressed) move.y += 1f;
+            Vector2 move = testMove;
+            bool sprint = false;
+            bool jump = testJump;
+            testJump = false;
+
+            if (keyboard != null)
+            {
+                move = Vector2.zero;
+                if (keyboard.aKey.isPressed) move.x -= 1f;
+                if (keyboard.dKey.isPressed) move.x += 1f;
+                if (keyboard.sKey.isPressed) move.y -= 1f;
+                if (keyboard.wKey.isPressed) move.y += 1f;
+                sprint = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+                jump = keyboard.spaceKey.wasPressedThisFrame;
+            }
+
             if (move.sqrMagnitude > 1f) move.Normalize();
-
-            bool sprint = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
             float speed = move.magnitude * (sprint ? runSpeed : walkSpeed);
 
             if (move.sqrMagnitude > 0.001f)
@@ -61,7 +78,7 @@ namespace Loomfall
             }
 
             bool onGround = Mathf.Abs(verticalSpeed) < 0.001f;
-            if (keyboard.spaceKey.wasPressedThisFrame && onGround)
+            if (jump && onGround)
             {
                 verticalSpeed = Mathf.Sqrt(2f * gravity * jumpHeight);
                 if (animator != null) animator.SetTrigger("jump");

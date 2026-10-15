@@ -17,11 +17,14 @@ namespace Loomfall.EditorTools
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             LoomfallCore.BuildVolume();
 
-            GameObject weaver = null;
-            foreach (Animator animator in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None))
+            GameObject weaver = GameObject.Find("ТкачУзел");
+            if (weaver == null)
             {
-                weaver = animator.gameObject;
-                break;
+                foreach (Animator animator in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None))
+                {
+                    weaver = animator.gameObject;
+                    break;
+                }
             }
 
             if (weaver == null)

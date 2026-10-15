@@ -9,6 +9,8 @@ namespace Loomfall.EditorTools
     {
         private static int frames;
         private static Vector3 startPosition;
+        private static float startTime;
+        private static float maxY;
         private static bool started;
 
         public static void Run()
@@ -16,6 +18,7 @@ namespace Loomfall.EditorTools
             EditorSceneManager.OpenScene("Assets/Scenes/LowerYardModels.unity");
             frames = 0;
             started = false;
+            maxY = 0f;
             EditorApplication.update += Tick;
             EditorApplication.EnterPlaymode();
         }
@@ -27,9 +30,14 @@ namespace Loomfall.EditorTools
             if (!started)
             {
                 started = true;
-                var hero = Object.FindObjectOfType<Loomfall.WeaverController>();
-                if (hero != null) startPosition = hero.transform.position;
-                Debug.Log("[Loomfall] Прогон: игра запустилась, Ткач на " + startPosition.ToString("F2"));
+                var first = Loomfall.WeaverController.Instance;
+                if (first != null)
+                {
+                    startPosition = first.transform.position;
+                    startTime = Time.time;
+                }
+                Debug.Log("[Loomfall] Прогон: игра запустилась, Ткач на " + startPosition.ToString("F2")
+                    + ", контроллер " + (first != null ? "взят из самого компонента" : "пуст"));
             }
 
             frames++;
@@ -105,9 +113,35 @@ namespace Loomfall.EditorTools
                     + ", кадров " + Time.frameCount + ", шаг " + Time.deltaTime.ToString("F4"));
             }
 
+            var driver = Loomfall.WeaverController.Instance;
+            if (driver != null)
+            {
+                // Ведём Ткача вперёд, как если бы игрок держал «W».
+                driver.testMove = frames >= 10 && frames < 110 ? new Vector2(0f, 1f) : Vector2.zero;
+                maxY = Mathf.Max(maxY, driver.transform.position.y);
+                if (frames == 60) driver.testJump = true;
+
+                // Пробный сдвиг: если его тоже отменит, значит позицию возвращает кто-то другой.
+                if (frames == 70) driver.transform.position += new Vector3(0f, 0f, 0.5f);
+                if (frames == 80)
+                {
+                    Debug.Log("[Loomfall] Прогон: пробный сдвиг на 0,5 м по Z дал " + driver.transform.position.ToString("F3"));
+                }
+
+                if (frames == 110)
+                {
+                    float moved = (driver.transform.position - startPosition).magnitude;
+                    float elapsed = Time.time - startTime;
+                    Debug.Log("[Loomfall] Прогон: Ткач прошёл " + moved.ToString("F3") + " м за " + elapsed.ToString("F3")
+                        + " с, скорость " + (elapsed > 0.0001f ? (moved / elapsed).ToString("F2") : "?")
+                        + " м/с при заданной ходьбе " + driver.walkSpeed.ToString("F2")
+                        + ", сдвиг по Z " + (driver.transform.position.z - startPosition.z).ToString("F3"));
+                }
+            }
+
             if (frames < 120) return;
 
-            var player = Object.FindObjectOfType<Loomfall.WeaverController>();
+            var player = Loomfall.WeaverController.Instance;
             var session = GameSession.Instance;
             var clock = OblivionClock.Instance;
             int shards = Object.FindObjectsOfType<Loomfall.MemoryShard>().Length;
@@ -116,7 +150,8 @@ namespace Loomfall.EditorTools
 
             Debug.Log("[Loomfall] Прогон: кадров " + frames
                 + ", Ткач на " + (player != null ? player.transform.position.ToString("F2") : "не найден")
-                + ", сдвиг " + (player != null ? (player.transform.position - startPosition).magnitude.ToString("F3") : "?"));
+                + ", сдвиг " + (player != null ? (player.transform.position - startPosition).magnitude.ToString("F3") : "?")
+                + ", выше всего " + maxY.ToString("F2"));
             Debug.Log("[Loomfall] Прогон: ход игры — " + (session != null)
                 + ", часов Забвения " + (clock != null ? clock.Oblivion.ToString("F3") : "нет")
                 + ", осколков в мире " + shards + ", светильников " + lamps + ", нитей " + threads);
